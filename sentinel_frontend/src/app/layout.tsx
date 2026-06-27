@@ -30,12 +30,19 @@ export default function RootLayout({
             </filter>
           </defs>
         </svg>
+
+        <div id="bg-orbs">
+          <div className="orb-1"></div>
+          <div className="orb-2"></div>
+          <div className="orb-3"></div>
+        </div>
+
         <Providers>
-          <div className="flex w-full min-h-screen">
+          <div className="flex w-full min-h-screen relative z-10 p-6 gap-6">
             <Sidebar />
-            <div className="flex flex-col flex-1 w-full">
+            <div className="flex flex-col flex-1 w-full gap-6">
               <TopNav />
-              <main className="flex-1 p-4 md:p-8 w-full max-w-[1600px] mx-auto">
+              <main className="flex-1 w-full max-w-[1600px] mx-auto">
                 {children}
               </main>
             </div>

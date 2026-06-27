@@ -1,3 +1,5 @@
+"use client";
+
 import TopMetricsCards from "@/components/dashboard/TopMetricsCards";
 import CloudTrailDropzone from "@/components/dashboard/CloudTrailDropzone";
 import RiskLeaderboard from "@/components/dashboard/RiskLeaderboard";
@@ -7,10 +9,19 @@ import AnalyticsDashboard from "@/components/dashboard/AnalyticsDashboard";
 import TopAttackPaths from "@/components/dashboard/TopAttackPaths";
 import AiRecommendations from "@/components/dashboard/AiRecommendations";
 import { BrainCircuit } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function CommandCenter() {
+  const prefersReducedMotion = typeof window !== 'undefined' ? window.matchMedia('(prefers-reduced-motion: reduce)').matches : false;
+  const pageTransition = {
+    initial: { opacity: 0, y: 8 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -8 },
+    transition: { duration: prefersReducedMotion ? 0 : 0.18, ease: "easeOut" }
+  };
+
   return (
-    <div className="flex flex-col gap-8 animate-in fade-in duration-500 pb-12">
+    <motion.div {...pageTransition} className="flex flex-col gap-8 pb-12">
       
       {/* Dashboard Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -38,20 +49,20 @@ export default function CommandCenter() {
       </section>
 
       {/* 5. Threat Intelligence Area */}
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="flex flex-col">
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+        <div className="flex flex-col h-auto overflow-visible light-dash-panel light-dash-panel-left">
           <div className="mb-4">
             <h2 className="text-lg font-semibold text-text-primary">Risk Leaderboard</h2>
           </div>
-          <div className="card flex-1 h-full">
+          <div className="flex-1">
             <RiskLeaderboard />
           </div>
         </div>
-        <div className="flex flex-col">
-          <div className="mb-4">
+        <div className="flex flex-col sticky top-6 h-[calc(100vh-120px)] overflow-y-auto scrollbar-thin scrollbar-thumb-indigo-500/30 scrollbar-track-transparent light-dash-panel light-dash-panel-right">
+          <div className="mb-4 shrink-0">
             <h2 className="text-lg font-semibold text-text-primary">Live Findings</h2>
           </div>
-          <div className="card flex-1 h-full">
+          <div className="flex-1">
             <RecentFindingsWidget />
           </div>
         </div>
@@ -85,6 +96,6 @@ export default function CommandCenter() {
       {/* 9. Recommendations Area */}
       <AiRecommendations />
       
-    </div>
+    </motion.div>
   );
 }

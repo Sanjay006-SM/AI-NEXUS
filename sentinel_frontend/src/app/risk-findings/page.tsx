@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Search, ChevronDown, ShieldAlert, AlertCircle, AlertTriangle, Info, Clock, CheckCircle, Activity, ShieldCheck } from "lucide-react";
+import { motion } from "framer-motion";
 
 // --- Mock Data ---
 const FINDINGS = [
@@ -16,28 +17,36 @@ const FINDINGS = [
 export default function RiskFindingsPage() {
   const [searchQuery, setSearchQuery] = useState("");
 
-  const getSeverityStyle = (severity: string) => {
-    switch (severity) {
-      case "CRITICAL": return { bar: "bg-[#ef4444]", badge: "text-[#ef4444] border-[#ef4444]/20 bg-[#ef4444]/10", icon: <ShieldAlert className="w-3.5 h-3.5" /> };
-      case "HIGH": return { bar: "bg-[#f97316]", badge: "text-[#f97316] border-[#f97316]/20 bg-[#f97316]/10", icon: <AlertCircle className="w-3.5 h-3.5" /> };
-      case "MEDIUM": return { bar: "bg-[#fbbf24]", badge: "text-[#fbbf24] border-[#fbbf24]/20 bg-[#fbbf24]/10", icon: <AlertTriangle className="w-3.5 h-3.5" /> };
-      case "LOW": return { bar: "bg-[#22c55e]", badge: "text-[#22c55e] border-[#22c55e]/20 bg-[#22c55e]/10", icon: <Info className="w-3.5 h-3.5" /> };
-      default: return { bar: "bg-[#64748b]", badge: "text-text-muted border-[#64748b]/20 bg-[#64748b]/10", icon: <Info className="w-3.5 h-3.5" /> };
-    }
-  };
+    const getSeverityStyle = (severity: string) => {
+      switch (severity) {
+        case "CRITICAL": return { bar: "bg-[#ef4444]", badge: "light-sev-critical text-[#ef4444] border-[#ef4444]/20 bg-[#ef4444]/10", icon: <ShieldAlert className="w-3.5 h-3.5" />, cardClass: "severity-critical" };
+        case "HIGH": return { bar: "bg-[#f97316]", badge: "light-sev-high text-[#f97316] border-[#f97316]/20 bg-[#f97316]/10", icon: <AlertCircle className="w-3.5 h-3.5" />, cardClass: "severity-high" };
+        case "MEDIUM": return { bar: "bg-[#fbbf24]", badge: "light-sev-medium text-[#fbbf24] border-[#fbbf24]/20 bg-[#fbbf24]/10", icon: <AlertTriangle className="w-3.5 h-3.5" />, cardClass: "severity-medium" };
+        case "LOW": return { bar: "bg-[#22c55e]", badge: "light-sev-low text-[#22c55e] border-[#22c55e]/20 bg-[#22c55e]/10", icon: <Info className="w-3.5 h-3.5" />, cardClass: "severity-low" };
+        default: return { bar: "bg-[#64748b]", badge: "text-text-muted border-[#64748b]/20 bg-[#64748b]/10", icon: <Info className="w-3.5 h-3.5" />, cardClass: "" };
+      }
+    };
 
-  const getStatusStyle = (status: string) => {
-    switch (status) {
-      case "OPEN": return "text-[#ef4444] border-[#ef4444]/30 bg-[#450a0a]/50";
-      case "INVESTIGATING": return "text-[#fbbf24] border-[#fbbf24]/30 bg-[#78350f]/50";
-      case "RESOLVED": return "text-[#22c55e] border-[#22c55e]/30 bg-green-100/50";
-      case "AUTO-REMEDIATED": return "text-[#818cf8] border-[#818cf8]/30 bg-[#1e1b4b]/50";
-      default: return "text-text-muted border-[#64748b]/30 bg-transparent";
-    }
+    const getStatusStyle = (status: string) => {
+      switch (status) {
+        case "OPEN": return "light-badge-open text-[#ef4444] border-[#ef4444]/30 bg-[#450a0a]/50";
+        case "INVESTIGATING": return "light-badge-investigating text-[#fbbf24] border-[#fbbf24]/30 bg-[#78350f]/50";
+        case "RESOLVED": return "light-badge-closed text-[#22c55e] border-[#22c55e]/30 bg-green-100/50";
+        case "AUTO-REMEDIATED": return "text-[#818cf8] border-[#818cf8]/30 bg-[#1e1b4b]/50";
+        default: return "text-text-muted border-[#64748b]/30 bg-transparent";
+      }
+    };
+
+  const prefersReducedMotion = typeof window !== 'undefined' ? window.matchMedia('(prefers-reduced-motion: reduce)').matches : false;
+  const pageTransition = {
+    initial: { opacity: 0, y: 8 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -8 },
+    transition: { duration: prefersReducedMotion ? 0 : 0.18, ease: "easeOut" }
   };
 
   return (
-    <div className="animate-in fade-in duration-500 pb-12 flex flex-col gap-6">
+    <motion.div {...pageTransition} className="pb-12 flex flex-col gap-6">
       
       {/* Header */}
       <div className="flex flex-col gap-4">
@@ -51,23 +60,23 @@ export default function RiskFindingsPage() {
         
         {/* Summary Chips */}
         <div className="flex flex-wrap items-center gap-3">
-          <div className="bg-transparent border border-glass-subtle rounded-md px-4 py-2 flex items-center gap-3 shadow-sm">
+          <div className="bg-transparent border border-glass-subtle rounded-md px-4 py-2 flex items-center gap-3 shadow-sm light-rf-pill">
             <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">Total Findings</span>
             <span className="text-lg font-bold text-text-primary">34</span>
           </div>
-          <div className="bg-transparent border border-glass-subtle rounded-md px-4 py-2 flex items-center gap-3 shadow-sm">
+          <div className="bg-transparent border border-glass-subtle rounded-md px-4 py-2 flex items-center gap-3 shadow-sm light-rf-pill">
             <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">Critical</span>
             <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-[#ef4444] shadow-[0_0_8px_rgba(239,68,68,0.6)]"></div><span className="text-lg font-bold text-text-primary">4</span></div>
           </div>
-          <div className="bg-transparent border border-glass-subtle rounded-md px-4 py-2 flex items-center gap-3 shadow-sm">
+          <div className="bg-transparent border border-glass-subtle rounded-md px-4 py-2 flex items-center gap-3 shadow-sm light-rf-pill">
             <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">High</span>
             <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-[#f97316]"></div><span className="text-lg font-bold text-text-primary">12</span></div>
           </div>
-          <div className="bg-transparent border border-glass-subtle rounded-md px-4 py-2 flex items-center gap-3 shadow-sm">
+          <div className="bg-transparent border border-glass-subtle rounded-md px-4 py-2 flex items-center gap-3 shadow-sm light-rf-pill">
             <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">Medium</span>
             <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-[#fbbf24]"></div><span className="text-lg font-bold text-text-primary">11</span></div>
           </div>
-          <div className="bg-transparent border border-glass-subtle rounded-md px-4 py-2 flex items-center gap-3 shadow-sm">
+          <div className="bg-transparent border border-glass-subtle rounded-md px-4 py-2 flex items-center gap-3 shadow-sm light-rf-pill">
             <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">Low</span>
             <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-[#22c55e]"></div><span className="text-lg font-bold text-text-primary">7</span></div>
           </div>
@@ -75,15 +84,15 @@ export default function RiskFindingsPage() {
       </div>
 
       {/* Filter Bar */}
-      <div className="p-4 border border-glass-subtle rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4 bg-glass-subtle shadow-md">
+      <div className="p-4 border border-glass-subtle rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4 bg-glass-subtle shadow-md light-rf-filter">
         <div className="flex flex-wrap items-center gap-2">
-          <button className="flex items-center gap-2 px-3 py-1.5 bg-transparent border border-glass-subtle hover:border-glass-active rounded-md text-sm text-text-primary transition-colors">
+          <button className="filter-dropdown flex items-center gap-2 px-3 py-1.5 bg-transparent border border-glass-subtle hover:border-glass-active rounded-md text-sm text-text-primary transition-colors">
             All Severities <ChevronDown className="w-3.5 h-3.5 text-text-muted" />
           </button>
-          <button className="flex items-center gap-2 px-3 py-1.5 bg-transparent border border-glass-subtle hover:border-glass-active rounded-md text-sm text-text-primary transition-colors">
+          <button className="filter-dropdown flex items-center gap-2 px-3 py-1.5 bg-transparent border border-glass-subtle hover:border-glass-active rounded-md text-sm text-text-primary transition-colors">
             All Clouds <ChevronDown className="w-3.5 h-3.5 text-text-muted" />
           </button>
-          <button className="flex items-center gap-2 px-3 py-1.5 bg-transparent border border-glass-subtle hover:border-glass-active rounded-md text-sm text-text-primary transition-colors">
+          <button className="filter-dropdown flex items-center gap-2 px-3 py-1.5 bg-transparent border border-glass-subtle hover:border-glass-active rounded-md text-sm text-text-primary transition-colors">
             All Statuses <ChevronDown className="w-3.5 h-3.5 text-text-muted" />
           </button>
         </div>
@@ -102,16 +111,19 @@ export default function RiskFindingsPage() {
 
       {/* Findings List (Cards) */}
       <div className="flex flex-col gap-3">
-        {FINDINGS.map((finding) => {
+        {FINDINGS.map((finding, index) => {
           const sevStyle = getSeverityStyle(finding.severity);
           
           return (
-            <div 
+            <motion.div 
               key={finding.id} 
-              className="relative bg-transparent border border-glass-subtle hover:border-glass-active rounded-xl flex flex-col md:flex-row overflow-hidden shadow-md hover:bg-white/10 transition-colors group"
+              initial={{ opacity: 0, x: prefersReducedMotion ? 0 : -8 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: prefersReducedMotion ? 0 : 0.15, delay: prefersReducedMotion ? 0 : index * 0.03 }}
+              className={`relative bg-transparent border border-glass-subtle hover:border-glass-active rounded-xl flex flex-col md:flex-row overflow-hidden shadow-md hover:bg-white/10 transition-colors group light-rf-card ${sevStyle.cardClass}`}
             >
               {/* Left colored bar */}
-              <div className={`absolute left-0 top-0 bottom-0 w-1 ${sevStyle.bar}`} />
+              <div className={`absolute left-0 top-0 bottom-0 w-1 ${sevStyle.bar} [.light-theme_&]:hidden`} />
               
               <div className="flex-1 p-5 pl-6 flex flex-col justify-center">
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
@@ -119,7 +131,7 @@ export default function RiskFindingsPage() {
                   {/* Main Content */}
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-3">
-                      <h3 className="font-bold text-lg text-text-primary leading-tight">{finding.title}</h3>
+                      <h3 className="font-bold text-lg text-text-primary leading-tight finding-title">{finding.title}</h3>
                       <div className={`hidden md:flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold border ${sevStyle.badge}`}>
                         {sevStyle.icon}
                         {finding.severity}
@@ -127,17 +139,17 @@ export default function RiskFindingsPage() {
                     </div>
                     
                     <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1">
-                      <span className="text-sm font-mono text-[#06b6d4] bg-[#06b6d4]/10 px-1.5 py-0.5 rounded">
+                      <span className="text-sm font-mono text-[#06b6d4] bg-[#06b6d4]/10 px-1.5 py-0.5 rounded finding-identity">
                         {finding.identity}
                       </span>
                       <span className="text-text-muted mx-1">•</span>
-                      <span className="text-sm text-text-muted">{finding.detail}</span>
+                      <span className="text-sm text-text-muted finding-subtitle">{finding.detail}</span>
                     </div>
                   </div>
 
                   {/* Right Side Info */}
                   <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-start gap-3 md:gap-2 shrink-0">
-                    <div className="flex items-center gap-2 text-xs text-text-muted font-mono">
+                    <div className="flex items-center gap-2 text-xs text-text-muted font-mono finding-time">
                       <Clock className="w-3.5 h-3.5" />
                       {finding.timestamp}
                     </div>
@@ -148,18 +160,18 @@ export default function RiskFindingsPage() {
                 </div>
 
                 {/* Actions Row */}
-                <div className="mt-4 pt-4 border-t border-slate-200/50 flex items-center justify-between opacity-80 group-hover:opacity-100 transition-opacity">
-                  <div className="text-xs font-mono text-text-muted uppercase tracking-wider">
+                <div className="mt-4 pt-4 border-t border-slate-200/50 flex items-center justify-between opacity-80 group-hover:opacity-100 transition-opacity [.light-theme_&]:border-transparent">
+                  <div className="text-xs font-mono text-text-muted uppercase tracking-wider finding-id">
                     ID: {finding.id}
                   </div>
                   <div className="flex items-center gap-2">
                     {finding.status !== 'AUTO-REMEDIATED' && finding.status !== 'RESOLVED' && (
-                      <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold text-[#818cf8] hover:bg-[#818cf8]/10 hover:text-[#a5b4fc] transition-colors border border-transparent hover:border-[#818cf8]/20">
+                      <button className="link-investigate flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold text-[#818cf8] hover:bg-[#818cf8]/10 hover:text-[#a5b4fc] transition-colors border border-transparent hover:border-[#818cf8]/20">
                         <Activity className="w-3.5 h-3.5" /> Investigate
                       </button>
                     )}
                     {finding.status !== 'RESOLVED' && finding.status !== 'AUTO-REMEDIATED' && (
-                      <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold text-[#22c55e] hover:bg-[#22c55e]/10 hover:text-[#4ade80] transition-colors border border-transparent hover:border-[#22c55e]/20">
+                      <button className="link-resolve flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold text-[#22c55e] hover:bg-[#22c55e]/10 hover:text-[#4ade80] transition-colors border border-transparent hover:border-[#22c55e]/20">
                         <CheckCircle className="w-3.5 h-3.5" /> Resolve
                       </button>
                     )}
@@ -172,11 +184,11 @@ export default function RiskFindingsPage() {
                 </div>
 
               </div>
-            </div>
+            </motion.div>
           );
         })}
       </div>
       
-    </div>
+    </motion.div>
   );
 }

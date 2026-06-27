@@ -6,10 +6,10 @@ import { motion } from "framer-motion";
 
 function WidgetBadge({ status, variant }: { status: string, variant: "monitoring" | "healthy" | "attention" | "processing" }) {
   const colors: Record<string, string> = {
-    monitoring: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-    healthy:    "bg-[#D3F531]/10 text-[#D3F531] border-[#D3F531]/20",
-    attention:  "bg-amber-500/10 text-amber-400 border-amber-500/20",
-    processing: "bg-purple-500/10 text-purple-400 border-purple-500/20",
+    monitoring: "bg-blue-500/10 text-blue-400 border-blue-500/20 light-badge-monitoring",
+    healthy:    "bg-[#D3F531]/10 text-[#D3F531] border-[#D3F531]/20 light-badge-healthy",
+    attention:  "bg-amber-500/10 text-amber-400 border-amber-500/20 light-badge-attention",
+    processing: "bg-purple-500/10 text-purple-400 border-purple-500/20 light-badge-processing",
   };
   return (
     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border backdrop-blur-md ${colors[variant]}`}>
@@ -19,6 +19,7 @@ function WidgetBadge({ status, variant }: { status: string, variant: "monitoring
 }
 
 export default function TopMetricsCards() {
+  const prefersReducedMotion = typeof window !== 'undefined' ? window.matchMedia('(prefers-reduced-motion: reduce)').matches : false;
   const { data, isLoading, isError, error } = useDashboardSummary();
 
   if (isError) {
@@ -76,7 +77,7 @@ export default function TopMetricsCards() {
     hidden: { opacity: 0 },
     visible: { 
       opacity: 1,
-      transition: { staggerChildren: 0.1 }
+      transition: { staggerChildren: prefersReducedMotion ? 0 : 0.05 }
     }
   };
 
@@ -88,7 +89,7 @@ export default function TopMetricsCards() {
   return (
     <div className="flex flex-col gap-6">
       {/* Top Status Strip */}
-      <div className="glass-panel p-4 flex flex-col md:flex-row gap-6 md:gap-12 items-center justify-between rounded-3xl">
+      <div className="glass-panel p-4 flex flex-col md:flex-row gap-6 md:gap-12 items-center justify-between rounded-3xl light-platform-metrics">
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 rounded-full bg-glass-subtle border border-glass-subtle flex items-center justify-center text-text-muted">
             <Cloud className="w-5 h-5" />
@@ -145,13 +146,13 @@ export default function TopMetricsCards() {
             <motion.div 
               key={i} 
               variants={cardVariants}
-              whileHover={{ y: -4, scale: 1.02 }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
-              className="glass-panel group relative flex flex-col p-6 rounded-3xl"
+              whileHover={{ y: prefersReducedMotion ? 0 : -3, scale: prefersReducedMotion ? 1 : 1.01 }}
+              transition={{ duration: prefersReducedMotion ? 0 : 0.2, ease: "easeOut" }}
+              className="glass-panel group relative flex flex-col p-6 rounded-3xl light-kpi-card"
             >
               {/* Top Row: Icon and Badge */}
               <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-glass-subtle border border-glass-subtle group-hover:bg-white/10 transition-colors shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-glass-subtle border border-glass-subtle group-hover:bg-white/10 transition-colors shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] light-kpi-icon">
                   <Icon className="w-5 h-5 text-[#D3F531]" />
                 </div>
                 <WidgetBadge status={m.status} variant={m.statusVariant} />
@@ -160,7 +161,7 @@ export default function TopMetricsCards() {
               {/* Middle Row: Title, Tooltip, Value */}
               <div className="flex flex-col gap-1 mb-6">
                 <div className="flex items-center gap-2">
-                  <h3 className="text-xs font-bold text-text-muted uppercase tracking-wider">{m.title}</h3>
+                  <h3 className="kpi-label text-xs font-bold text-text-muted uppercase tracking-wider">{m.title}</h3>
                   <div className="group/tooltip relative flex items-center justify-center">
                     <Info className="w-3.5 h-3.5 text-text-muted hover:text-white cursor-help transition-colors" />
                     <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 text-xs rounded-lg shadow-xl opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none z-50 bg-black/80 backdrop-blur-xl border border-glass-subtle text-text-secondary">
@@ -169,11 +170,11 @@ export default function TopMetricsCards() {
                   </div>
                 </div>
                 <div className="flex items-baseline gap-2">
-                  <h2 className="text-4xl font-bold text-text-primary tracking-tight drop-shadow-md">
+                  <h2 className="kpi-value text-4xl font-bold text-text-primary tracking-tight drop-shadow-md">
                     {isLoading ? "-" : m.value}
                   </h2>
                 </div>
-                <p className="text-xs text-text-muted mt-1">{m.description}</p>
+                <p className="kpi-subtext text-xs text-text-muted mt-1">{m.description}</p>
               </div>
 
               {/* Bottom Row: Trend (Mini Chart visualization) */}

@@ -56,8 +56,8 @@ export default function CloudTrailDropzone() {
       {/* Header */}
       <div className="p-4 flex items-center justify-between z-10 border-b border-glass-subtle border bg-glass-subtle rounded-t-[20px]">
         <div className="flex items-center gap-3">
-          <Terminal className="w-5 h-5" style={{ color: '#D3F531' }} />
-          <h2 className="text-sm font-semibold" style={{ color: '#ffffff' }}>CloudTrail Activity Stream</h2>
+          <Terminal className="w-5 h-5 text-primary" />
+          <h2 className="text-sm font-semibold text-text-primary">CloudTrail Activity Stream</h2>
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
@@ -148,10 +148,10 @@ export default function CloudTrailDropzone() {
                   {log.event_time ? new Date(log.event_time).toISOString().split('T')[1].slice(0, 8) : "--:--:--"}
                 </div>
                 <div className="flex-1 flex flex-row items-center gap-4 font-mono text-[11px]">
-                  <span className={`font-bold ${log.event?.includes('Delete') || log.event?.includes('Deny') ? '' : ''}`} style={{ color: log.event?.includes('Delete') || log.event?.includes('Deny') ? '#dc2626' : '#0f172a' }}>
+                  <span className={`font-bold ${log.event?.includes('Delete') || log.event?.includes('Deny') ? 'text-critical' : 'text-text-primary'}`}>
                     {log.event}
                   </span>
-                  <span className="truncate max-w-[200px] font-mono" style={{ color: '#D3F531' }} title={log.user}>
+                  <span className="truncate max-w-[200px] font-mono text-primary" title={log.user}>
                     {log.user?.split('/').pop() || "Unknown"}
                   </span>
                   {log.isAnomaly && (
@@ -172,7 +172,7 @@ export default function CloudTrailDropzone() {
       
       {/* Footer Instructions */}
       <div className="p-2 text-center z-10 bg-glass-subtle border-t border-dashed border-glass-active border">
-        <p className="text-[10px] uppercase tracking-widest" style={{ color: '#94a3b8', letterSpacing: '0.08em' }}>Drag and drop CloudTrail JSON here to upload manually</p>
+        <p className="text-[10px] uppercase tracking-widest text-text-muted" style={{ letterSpacing: '0.08em' }}>Drag and drop CloudTrail JSON here to upload manually</p>
       </div>
     </div>
   );

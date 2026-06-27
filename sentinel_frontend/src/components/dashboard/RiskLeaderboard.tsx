@@ -26,6 +26,7 @@ const getProviderDetails = (arn: string) => {
 };
 
 export default function RiskLeaderboard() {
+  const prefersReducedMotion = typeof window !== 'undefined' ? window.matchMedia('(prefers-reduced-motion: reduce)').matches : false;
   const { data: identities, isLoading } = useIdentities();
   const router = useRouter();
 
@@ -49,10 +50,10 @@ export default function RiskLeaderboard() {
   };
 
   const getRiskDetails = (score: number) => {
-    if (score >= 80) return { label: "Critical", chip: "bg-[#450a0a] text-critical border-critical/20" };
-    if (score >= 60) return { label: "High", chip: "bg-[#7c2d12] text-high border-high/20" }; 
-    if (score >= 40) return { label: "Medium", chip: "bg-warning/20 text-warning border-warning/30" };
-    return { label: "Low", chip: "bg-success/20 text-success border-success/30" };
+    if (score >= 80) return { label: "Critical", chip: "light-score-critical bg-[#450a0a] text-critical border-critical/20" };
+    if (score >= 60) return { label: "High", chip: "light-score-high bg-[#7c2d12] text-high border-high/20" }; 
+    if (score >= 40) return { label: "Medium", chip: "light-score-medium bg-warning/20 text-warning border-warning/30" };
+    return { label: "Low", chip: "light-score-low bg-success/20 text-success border-success/30" };
   };
 
   const filteredAndSorted = useMemo(() => {
@@ -84,10 +85,10 @@ export default function RiskLeaderboard() {
   }, [identities, searchQuery, sortConfig]);
 
   return (
-    <div className="card flex flex-col h-full bg-card border-border overflow-hidden">
+    <div className="flex flex-col h-full overflow-visible w-full">
       
       {/* Header & Search */}
-      <div className="px-4 py-2.5 border-b border-border flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="px-1 py-2.5 flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
         <div>
           <h2 className="text-base font-bold text-text-primary">Risk Leaderboard</h2>
           <p className="text-[11px] text-text-secondary mt-0.5">Identities ranked by lateral movement potential.</p>
@@ -106,8 +107,8 @@ export default function RiskLeaderboard() {
       
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse min-w-[800px]">
-          <thead className="bg-elevated border-b border-border sticky top-0 z-10 text-[11px] uppercase tracking-wider text-text-muted font-bold">
+        <table className="w-full text-left border-collapse min-w-[700px]">
+          <thead className="bg-transparent border-b border-border text-[11px] uppercase tracking-wider text-text-muted font-bold light-table-th">
             <tr>
               <th className="px-3 py-2 w-12 text-center">#</th>
               <th className="px-3 py-2 cursor-pointer hover:text-text-primary transition-colors group" onClick={() => handleSort("arn")}>
@@ -145,7 +146,7 @@ export default function RiskLeaderboard() {
             </tr>
           </thead>
           
-          <tbody className="divide-y divide-border bg-card">
+          <tbody className="divide-y divide-border bg-transparent">
             <AnimatePresence>
               {isLoading ? (
                 <motion.tr key="loading" exit={{ opacity: 0 }}>
@@ -174,14 +175,14 @@ export default function RiskLeaderboard() {
                   return (
                     <motion.tr 
                       key={id.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.03 }}
+                      initial={{ opacity: 0, x: prefersReducedMotion ? 0 : -8 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: prefersReducedMotion ? 0 : 0.15, delay: prefersReducedMotion ? 0 : index * 0.03 }}
                       onClick={() => router.push(`/canvas/${id.id}`)}
-                      className="hover:bg-elevated cursor-pointer transition-colors group"
+                      className="hover:bg-elevated transition-colors group light-table-row"
                     >
                       {/* Rank Number */}
-                      <td className="px-3 py-2 text-center font-mono text-text-muted text-[11px]">
+                      <td className="px-3 py-3 text-center font-mono text-text-muted text-[13px] light-row-num">
                         {index + 1}
                       </td>
 
@@ -192,8 +193,8 @@ export default function RiskLeaderboard() {
                             <IdentityIcon className="w-3.5 h-3.5 text-text-secondary group-hover:text-primary transition-colors" />
                           </div>
                           <div className="flex flex-col">
-                            <span className="font-bold text-[13px] text-text-primary leading-none">{name}</span>
-                            <span className="text-[11px] text-text-secondary font-mono truncate max-w-[200px] mt-0.5">us-east-1</span>
+                            <span className="font-bold text-[14px] text-text-primary leading-none light-identity-name">{name}</span>
+                            <span className="text-[12px] text-text-secondary font-mono truncate max-w-[200px] mt-0.5 light-identity-region">us-east-1</span>
                           </div>
                         </div>
                       </td>
@@ -207,7 +208,7 @@ export default function RiskLeaderboard() {
 
                       {/* Identity Type */}
                       <td className="px-3 py-2">
-                        <span className="text-[12px] text-text-secondary">{identityTypeLabel}</span>
+                        <span className="text-[13px] text-text-secondary light-type-text">{identityTypeLabel}</span>
                       </td>
 
                       {/* Risk Score */}

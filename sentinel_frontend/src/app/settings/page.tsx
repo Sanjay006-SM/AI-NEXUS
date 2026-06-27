@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useGlobalStore } from "@/lib/store";
 import { Settings, Cloud, Shield, Bell, Key, Users, CreditCard, CheckCircle2, Server, GitBranch, Lock, Activity, Save, Loader2, Check } from "lucide-react";
+import { motion } from "framer-motion";
 
 const CATEGORIES = [
   { id: "general", name: "General", icon: <Settings className="w-4 h-4" /> },
@@ -47,33 +48,50 @@ export default function SettingsPage() {
     anomalyUpdates: false,
   });
 
+  const prefersReducedMotion = typeof window !== 'undefined' ? window.matchMedia('(prefers-reduced-motion: reduce)').matches : false;
+  const pageTransition = {
+    initial: { opacity: 0, y: 8 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -8 },
+    transition: { duration: prefersReducedMotion ? 0 : 0.18, ease: "easeOut" }
+  };
+  const buttonTransition = {
+    whileTap: { scale: prefersReducedMotion ? 1 : 0.97 },
+    transition: { duration: prefersReducedMotion ? 0 : 0.1 }
+  };
+  const navTransition = {
+    whileHover: { x: prefersReducedMotion ? 0 : 4 },
+    transition: { duration: prefersReducedMotion ? 0 : 0.15 }
+  };
+
   return (
-    <div className="animate-in fade-in duration-500 pb-12 flex flex-col md:flex-row gap-8">
+    <motion.div {...pageTransition} className="pb-12 flex flex-col md:flex-row gap-8">
       
       {/* Left Navigation */}
-      <div className="w-full md:w-64 shrink-0 flex flex-col gap-2">
+      <div className="w-full md:w-64 shrink-0 flex flex-col gap-2 light-settings-nav">
         <h1 className="text-2xl font-bold tracking-tight text-text-primary mb-4">Settings</h1>
         
         <div className="flex flex-col gap-1">
           {CATEGORIES.map(category => (
-            <button
+            <motion.button
               key={category.id}
+              {...navTransition}
               onClick={() => setActiveTab(category.id)}
-              className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
+              className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                 activeTab === category.id 
-                  ? "bg-glass-subtle text-text-primary border border-glass-active shadow-sm" 
-                  : "text-text-muted border border-transparent hover:bg-slate-100/50 hover:text-[#e2e8f0]"
+                  ? "bg-glass-subtle text-text-primary border border-glass-active shadow-sm light-settings-nav-item-active" 
+                  : "text-text-muted border border-transparent hover:bg-slate-100/50 hover:text-[#e2e8f0] light-settings-nav-item-inactive"
               }`}
             >
               {category.icon}
               {category.name}
-            </button>
+            </motion.button>
           ))}
         </div>
       </div>
 
       {/* Right Content Panel */}
-      <div className="flex-1 bg-transparent border border-glass-subtle rounded-xl shadow-lg p-6 min-h-[600px]">
+      <div className="flex-1 bg-transparent border border-glass-subtle rounded-xl shadow-lg p-6 min-h-[600px] light-settings-content">
         
         {/* GENERAL SECTION */}
         {activeTab === "general" && (
@@ -91,7 +109,7 @@ export default function SettingsPage() {
                   type="text" 
                   value={orgName}
                   onChange={(e) => setOrgName(e.target.value)}
-                  className="w-full bg-glass-subtle border border-glass-subtle hover:border-glass-active focus:border-[#D3F531] focus:ring-1 focus:ring-[#D3F531] outline-none rounded-lg px-4 py-2.5 text-sm text-text-primary transition-all"
+                  className="w-full bg-glass-subtle border border-glass-subtle hover:border-glass-active focus:border-[#D3F531] focus:ring-1 focus:ring-[#D3F531] outline-none rounded-lg px-4 py-2.5 text-sm text-text-primary transition-all light-settings-input"
                 />
               </div>
 
@@ -101,7 +119,7 @@ export default function SettingsPage() {
                 <select 
                   value={timezone}
                   onChange={(e) => setTimezone(e.target.value)}
-                  className="w-full bg-glass-subtle border border-glass-subtle hover:border-glass-active focus:border-[#D3F531] focus:ring-1 focus:ring-[#D3F531] outline-none rounded-lg px-4 py-2.5 text-sm text-text-primary transition-all"
+                  className="w-full bg-glass-subtle border border-glass-subtle hover:border-glass-active focus:border-[#D3F531] focus:ring-1 focus:ring-[#D3F531] outline-none rounded-lg px-4 py-2.5 text-sm text-text-primary transition-all light-settings-input"
                 >
                   <option>UTC (Coordinated Universal Time)</option>
                   <option>EST (Eastern Standard Time)</option>
@@ -113,32 +131,36 @@ export default function SettingsPage() {
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-bold text-text-secondary">Theme</label>
                 <div className="flex bg-glass-subtle p-1 border border-glass-subtle rounded-lg">
-                  <button 
+                  <motion.button 
+                    {...buttonTransition}
                     onClick={() => setTheme("Dark")}
-                    className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${theme === "Dark" ? "bg-[#D3F531] text-black font-bold shadow-sm" : "text-text-muted hover:text-white"}`}
+                    className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${theme === "Dark" ? "bg-[#D3F531] text-black font-bold shadow-sm" : "text-text-muted hover:text-white light-settings-toggle-inactive"}`}
                   >
                     Dark
-                  </button>
-                  <button 
+                  </motion.button>
+                  <motion.button 
+                    {...buttonTransition}
                     onClick={() => setTheme("Light")}
-                    className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${theme === "Light" ? "bg-[#D3F531] text-black font-bold shadow-sm" : "text-text-muted hover:text-white"}`}
+                    className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${theme === "Light" ? "bg-[#D3F531] text-black font-bold shadow-sm light-settings-toggle-active" : "text-text-muted hover:text-white light-settings-toggle-inactive"}`}
                   >
                     Light
-                  </button>
-                  <button 
+                  </motion.button>
+                  <motion.button 
+                    {...buttonTransition}
                     onClick={() => setTheme("System")}
-                    className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${theme === "System" ? "bg-[#D3F531] text-black font-bold shadow-sm" : "text-text-muted hover:text-white"}`}
+                    className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${theme === "System" ? "bg-[#D3F531] text-black font-bold shadow-sm" : "text-text-muted hover:text-white light-settings-toggle-inactive"}`}
                   >
                     System
-                  </button>
+                  </motion.button>
                 </div>
               </div>
 
               <div className="pt-4">
-                <button 
+                <motion.button 
+                  {...buttonTransition}
                   onClick={handleSave}
                   disabled={isSaving}
-                  className="px-6 py-2.5 bg-[#D3F531] hover:bg-[#bde026] text-black font-bold rounded-lg shadow-[0_0_20px_rgba(211,245,49,0.3)] transition-all flex items-center justify-center gap-2 min-w-[160px] disabled:opacity-80"
+                  className="px-6 py-2.5 bg-[#D3F531] hover:bg-[#bde026] text-black font-bold rounded-lg shadow-[0_0_20px_rgba(211,245,49,0.3)] transition-all flex items-center justify-center gap-2 min-w-[160px] disabled:opacity-80 light-settings-save-btn"
                 >
                   {isSaving ? (
                     <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</>
@@ -147,7 +169,7 @@ export default function SettingsPage() {
                   ) : (
                     <><Save className="w-4 h-4" /> Save Changes</>
                   )}
-                </button>
+                </motion.button>
               </div>
             </div>
           </div>
@@ -314,6 +336,6 @@ export default function SettingsPage() {
         )}
 
       </div>
-    </div>
+    </motion.div>
   );
 }

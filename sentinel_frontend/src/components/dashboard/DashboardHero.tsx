@@ -114,7 +114,7 @@ export default function DashboardHero() {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="glass-panel flex flex-col p-0 overflow-hidden relative"
+        className="glass-panel flex flex-col p-0 overflow-hidden relative light-hero"
       >
         {/* Subtle radial glow in top-right */}
         <div className="absolute -top-32 -right-32 w-96 h-96 bg-[#D3F531]/10 blur-[100px] rounded-full pointer-events-none"></div>
@@ -126,12 +126,12 @@ export default function DashboardHero() {
           {/* LEFT SIDE */}
           <div className="flex-1 flex flex-col justify-center">
             <motion.div variants={itemVariants}>
-              <h1 className="text-[28px] font-bold text-text-primary leading-tight">
+              <h1 className="hero-heading text-[28px] font-bold text-text-primary leading-tight">
                 Command Center for Machine Identities
               </h1>
             </motion.div>
             
-            <motion.p variants={itemVariants} className="text-text-muted text-base max-w-2xl mt-3 mb-8">
+            <motion.p variants={itemVariants} className="hero-subtext text-text-muted text-base max-w-2xl mt-3 mb-8">
               Monitor cloud identities, detect attack paths, calculate risk, and investigate threats using AI.
             </motion.p>
             
@@ -139,14 +139,14 @@ export default function DashboardHero() {
             <motion.div variants={itemVariants} className="flex flex-wrap gap-4 mb-8">
               <button 
                 onClick={() => router.push('/risk-findings')}
-                className="btn btn-primary h-11 px-6 flex items-center gap-2"
+                className="btn btn-primary h-11 px-6 flex items-center gap-2 light-btn-investigate"
               >
                 <Search className="w-4 h-4" />
                 Start Investigation
               </button>
               <button 
                 onClick={() => router.push('/ai-investigation')}
-                className="btn bg-glass-subtle border border-glass-active text-text-primary hover:bg-white/10 hover:border-[#D3F531]/50 h-11 px-6 flex items-center gap-2 transition-colors"
+                className="btn h-11 px-6 flex items-center gap-2 transition-colors bg-glass-subtle border border-glass-active text-text-primary hover:bg-white/10 hover:border-[#D3F531]/50 light-btn-ask-ai"
               >
                 <BrainCircuit className="w-4 h-4 text-[#D3F531]" />
                 Ask SentryIQ AI
@@ -163,7 +163,7 @@ export default function DashboardHero() {
               ].map((stat, idx) => (
                 <div 
                   key={idx} 
-                  className="bg-glass-subtle border border-glass-subtle px-3 py-1.5 rounded text-xs font-mono text-text-primary flex items-center gap-2"
+                  className="bg-glass-subtle border border-glass-subtle px-3 py-1.5 rounded text-xs font-mono text-text-primary flex items-center gap-2 light-stat-pill"
                 >
                   <div className="w-1.5 h-1.5 rounded-full bg-[#D3F531] animate-pulse shadow-[0_0_8px_rgba(211,245,49,0.8)]"></div>
                   {stat}
@@ -174,13 +174,13 @@ export default function DashboardHero() {
 
           {/* RIGHT SIDE: Quick Actions */}
           <motion.div variants={itemVariants} className="lg:w-72 shrink-0 flex flex-col gap-3">
-            <h3 className="text-xs font-bold text-text-muted uppercase tracking-wider mb-1">Quick Actions</h3>
+            <h3 className="quick-actions-label text-xs font-bold text-text-muted uppercase tracking-wider mb-1">Quick Actions</h3>
             
             <motion.button 
               whileHover={{ scale: 1.02 }} 
               whileTap={{ scale: 0.98 }} 
               onClick={() => { setUploadState('idle'); setIsUploadModalOpen(true); }}
-              className="btn bg-glass-subtle border border-glass-subtle hover:border-[#6366f1]/50 w-full justify-start gap-3 h-11 px-4 text-text-primary transition-all"
+              className="btn bg-glass-subtle border border-glass-subtle hover:border-[#6366f1]/50 w-full justify-start gap-3 h-11 px-4 text-text-primary transition-all light-btn-quick"
             >
               <UploadCloud className="w-4 h-4 text-[#06b6d4]" />
               Upload CloudTrail
@@ -190,7 +190,7 @@ export default function DashboardHero() {
               whileHover={{ scale: 1.02 }} 
               whileTap={{ scale: 0.98 }} 
               onClick={() => router.push('/ai-investigation?prompt=run_full_investigation')}
-              className="btn bg-glass-subtle border border-glass-subtle hover:border-[#6366f1]/50 w-full justify-start gap-3 h-11 px-4 text-text-primary transition-all"
+              className="btn bg-glass-subtle border border-glass-subtle hover:border-[#6366f1]/50 w-full justify-start gap-3 h-11 px-4 text-text-primary transition-all light-btn-quick"
             >
               <Play className="w-4 h-4 text-[#6366f1]" />
               Run AI Investigation
@@ -200,7 +200,7 @@ export default function DashboardHero() {
               whileHover={{ scale: 1.02 }} 
               whileTap={{ scale: 0.98 }} 
               onClick={() => router.push('/attack-graph')}
-              className="btn bg-glass-subtle border border-glass-subtle hover:border-[#6366f1]/50 w-full justify-start gap-3 h-11 px-4 text-text-primary transition-all"
+              className="btn bg-glass-subtle border border-glass-subtle hover:border-[#6366f1]/50 w-full justify-start gap-3 h-11 px-4 text-text-primary transition-all light-btn-quick"
             >
               <GitBranch className="w-4 h-4 text-[#f97316]" />
               Open Attack Graph
@@ -210,7 +210,7 @@ export default function DashboardHero() {
               whileHover={{ scale: 1.02 }} 
               whileTap={{ scale: 0.98 }} 
               onClick={() => { setExportState('idle'); setIsExportModalOpen(true); }}
-              className="btn bg-glass-subtle border border-glass-subtle hover:border-[#6366f1]/50 w-full justify-start gap-3 h-11 px-4 text-text-primary transition-all"
+              className="btn bg-glass-subtle border border-glass-subtle hover:border-[#6366f1]/50 w-full justify-start gap-3 h-11 px-4 text-text-primary transition-all light-btn-quick"
             >
               <Download className="w-4 h-4 text-[#22c55e]" />
               Export Report

@@ -9,7 +9,7 @@ export default function TopAttackPaths() {
   return (
     <section className="mt-4">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold" style={{ color: '#ffffff' }}>Top Attack Paths</h2>
+        <h2 className="text-lg font-semibold text-text-primary">Top Attack Paths</h2>
         {!isLoading && !isError && paths && paths.length > 0 && (
           <div className="border border-[#ef4444]/30 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5" style={{ background: '#fee2e2', color: '#dc2626' }}>
             <ShieldCheck className="w-3.5 h-3.5" /> {paths.length} critical paths detected
@@ -18,7 +18,7 @@ export default function TopAttackPaths() {
       </div>
       <div className="glass-panel flex flex-col p-1 min-h-[150px] rounded-[20px]">
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-12 gap-3" style={{ color: '#94a3b8' }}>
+          <div className="flex flex-col items-center justify-center py-12 gap-3 text-text-muted">
             <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: '#6366f1', borderTopColor: 'transparent' }}></div>
             <p className="text-sm">Analyzing graph paths...</p>
           </div>
@@ -30,7 +30,7 @@ export default function TopAttackPaths() {
         ) : !paths || paths.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 gap-2">
             <ShieldCheck className="w-10 h-10" style={{ color: '#16a34a' }} />
-            <p className="text-sm" style={{ color: '#9ca3af' }}>No exploitable paths detected</p>
+            <p className="text-sm text-text-muted">No exploitable paths detected</p>
           </div>
         ) : (
           <div className="flex flex-col">
@@ -63,13 +63,13 @@ export default function TopAttackPaths() {
                           
                           {edge && (
                             <>
-                              <span style={{ color: '#94a3b8' }}>→</span>
+                              <span className="text-text-muted">→</span>
                               <span className={`border-b border-dashed ${
                                 path.severity === "Critical" ? "text-[#ef4444] border-[#ef4444]/50" : "text-[#f97316] border-[#f97316]/50"
                               }`}>
                                 {edge}
                               </span>
-                              <span style={{ color: '#94a3b8' }}>→</span>
+                              <span className="text-text-muted">→</span>
                             </>
                           )}
                         </div>
@@ -89,8 +89,8 @@ export default function TopAttackPaths() {
           </div>
         )}
         <div className="p-2 mt-auto border-t border-glass-subtle border">
-          <a href="/attack-graph" className="btn bg-transparent w-full justify-center gap-2 h-10 border border-transparent transition-all flex items-center" style={{ color: '#9ca3af' }}>
-            View Full Interactive Graph <span className="ml-2" style={{ color: '#D3F531' }}>→</span>
+          <a href="/attack-graph" className="btn bg-transparent w-full justify-center gap-2 h-10 border border-transparent transition-all flex items-center text-text-muted">
+            View Full Interactive Graph <span className="ml-2 text-primary">→</span>
           </a>
         </div>
       </div>
