@@ -1,0 +1,52 @@
+{
+  "Records": [
+    {
+      "eventVersion": "1.08",
+      "userIdentity": {
+        "type": "IAMUser",
+        "principalId": "AIDAJQABLZS4A3QDU576Q",
+        "arn": "arn:aws:iam::123456789012:user/Alice",
+        "accountId": "123456789012"
+      },
+      "eventTime": "2023-10-15T14:30:00Z",
+      "eventSource": "s3.amazonaws.com",
+      "eventName": "GetObject",
+      "awsRegion": "us-east-1",
+      "sourceIPAddress": "192.168.1.10",
+      "userAgent": "aws-cli/2.0.0",
+      "eventID": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
+      "eventType": "AwsApiCall",
+      "readOnly": true,
+      "recipientAccountId": "123456789012",
+      "resources": [
+        {
+          "ARN": "arn:aws:s3:::my-secure-bucket/secret.txt",
+          "accountId": "123456789012",
+          "type": "AWS::S3::Object"
+        }
+      ]
+    },
+    {
+      "eventVersion": "1.08",
+      "userIdentity": {
+        "type": "AssumedRole",
+        "principalId": "AROA1234567890EXAMPLE:session1",
+        "arn": "arn:aws:sts::123456789012:assumed-role/AdminRole/session1",
+        "accountId": "123456789012"
+      },
+      "eventTime": "2023-10-15T15:00:00Z",
+      "eventSource": "iam.amazonaws.com",
+      "eventName": "DeleteRole",
+      "awsRegion": "us-east-1",
+      "sourceIPAddress": "10.0.0.55",
+      "userAgent": "console.amazonaws.com",
+      "eventID": "b2c3d4e5-f6a7-8b9c-0d1e-2f3a4b5c6d7e",
+      "eventType": "AwsApiCall",
+      "readOnly": false,
+      "recipientAccountId": "123456789012",
+      "requestParameters": {
+        "roleName": "OldDeveloperRole"
+      }
+    }
+  ]
+}

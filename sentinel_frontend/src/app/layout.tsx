@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/Providers";
-import Sidebar from "@/components/layout/Sidebar";
-import TopNav from "@/components/layout/TopNav";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
+const plusJakarta = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-jakarta" });
 
 export const metadata: Metadata = {
   title: "SentinelAI",
@@ -20,7 +19,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${jetbrains.variable} font-sans text-text-primary min-h-screen antialiased`}>
+      <body className={`${inter.variable} ${jetbrains.variable} ${plusJakarta.variable} font-sans text-text-primary min-h-screen antialiased`}>
         {/* Liquid Glass SVG distortion filter */}
         <svg style={{position:'absolute',width:0,height:0,overflow:'hidden'}} aria-hidden="true">
           <defs>
@@ -38,15 +37,7 @@ export default function RootLayout({
         </div>
 
         <Providers>
-          <div className="flex w-full min-h-screen relative z-10 p-6 gap-6">
-            <Sidebar />
-            <div className="flex flex-col flex-1 w-full gap-6">
-              <TopNav />
-              <main className="flex-1 w-full max-w-[1600px] mx-auto">
-                {children}
-              </main>
-            </div>
-          </div>
+          {children}
         </Providers>
       </body>
     </html>

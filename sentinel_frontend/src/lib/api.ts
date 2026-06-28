@@ -35,7 +35,15 @@ class ApiClient {
         body: isFormData ? body : JSON.stringify(body),
       });
       console.log(`[API POST Response Status]: ${res.status} ${res.statusText}`);
-      if (!res.ok) throw new Error(`API POST error: ${res.statusText}`);
+      if (!res.ok) {
+        let errorMsg = `API POST error: ${res.statusText}`;
+        try {
+          const errorData = await res.json();
+          if (errorData.detail) errorMsg = errorData.detail;
+          else errorMsg = JSON.stringify(errorData);
+        } catch (e) {}
+        throw new Error(errorMsg);
+      }
       const data = await res.json();
       console.log(`[API POST Response Data]:`, data);
       return data;

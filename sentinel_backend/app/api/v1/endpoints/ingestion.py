@@ -65,6 +65,7 @@ def process_file_background(file_content: bytes, job_id: str):
             job.status = 'failed'
             job.completed_at = func.now()
             db.commit()
+        raise e
     finally:
         db.close()
 
@@ -94,8 +95,8 @@ async def upload_cloudtrail_logs(
         db.commit()
         db.refresh(job)
         
-        # Process the file in the background to avoid blocking the HTTP thread
-        background_tasks.add_task(process_file_background, content, str(job.job_id))
+        # Process the file synchronously for real-time UI updates
+        process_file_background(content, str(job.job_id))
         
         return {
             "message": "File uploaded and processed successfully.",
