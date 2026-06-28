@@ -1159,7 +1159,7 @@
   html:not(.light-theme) .nav-pill-active svg {
     color: #0f172a !important;
   }
-  html:not(.light-theme) .nav-pill-active .bg-white\\/20 {
+  html:not(.light-theme) .nav-pill-active .bg-white\/20 {
     background-color: rgba(15, 23, 42, 0.15) !important;
   }
   html:not(.light-theme) .nav-pill-active + .sidebar-active-indicator,
@@ -1171,33 +1171,33 @@
   html:not(.light-theme) .text-blue-500 {
     color: #d3f531 !important;
   }
-  html:not(.light-theme) .text-blue-500\\/80 {
+  html:not(.light-theme) .text-blue-500\/80 {
     color: rgba(211, 245, 49, 0.8) !important;
   }
-  html:not(.light-theme) .bg-blue-500\\/20 {
+  html:not(.light-theme) .bg-blue-500\/20 {
     background-color: rgba(211, 245, 49, 0.2) !important;
   }
-  html:not(.light-theme) .border-blue-500\\/30 {
+  html:not(.light-theme) .border-blue-500\/30 {
     border-color: rgba(211, 245, 49, 0.3) !important;
   }
-  html:not(.light-theme) .border-blue-500\\/40 {
+  html:not(.light-theme) .border-blue-500\/40 {
     border-color: rgba(211, 245, 49, 0.4) !important;
   }
-  html:not(.light-theme) .from-blue-500\\/20 {
+  html:not(.light-theme) .from-blue-500\/20 {
     --tw-gradient-from: rgba(211, 245, 49, 0.2) !important;
     --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(211, 245, 49, 0)) !important;
   }
-  html:not(.light-theme) .to-indigo-500\\/10 {
+  html:not(.light-theme) .to-indigo-500\/10 {
     --tw-gradient-to: rgba(211, 245, 49, 0.1) !important;
   }
-  html:not(.light-theme) .hover\\:text-blue-600:hover,
+  html:not(.light-theme) .hover\:text-blue-600:hover,
   html:not(.light-theme) .text-blue-600 {
     color: #d3f531 !important;
   }
   html:not(.light-theme) .bg-blue-500 {
     background-color: #d3f531 !important;
   }
-  html:not(.light-theme) .shadow-\\[0_0_8px_rgba\\(59\\,130\\,246\\,0\\.8\\)\\] {
+  html:not(.light-theme) .shadow-\[0_0_8px_rgba\(59\,130\,246\,0\.8\)\] {
     box-shadow: 0 0 8px rgba(211, 245, 49, 0.8) !important;
   }
   

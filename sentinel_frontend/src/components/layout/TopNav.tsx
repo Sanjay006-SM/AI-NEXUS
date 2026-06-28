@@ -11,7 +11,7 @@ export default function TopNav() {
     visible: { 
       y: 0, 
       opacity: 1,
-      transition: { duration: prefersReducedMotion ? 0 : 0.4, ease: "easeOut", delay: prefersReducedMotion ? 0 : 0.1 }
+      transition: { duration: prefersReducedMotion ? 0 : 0.4, ease: "easeOut" as const, delay: prefersReducedMotion ? 0 : 0.1 }
     }
   };
 

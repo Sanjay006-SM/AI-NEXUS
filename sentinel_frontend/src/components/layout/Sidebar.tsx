@@ -39,7 +39,7 @@ export default function Sidebar() {
     visible: { 
       x: 0, 
       opacity: 1,
-      transition: { duration: prefersReducedMotion ? 0 : 0.4, ease: "easeOut" }
+      transition: { duration: prefersReducedMotion ? 0 : 0.4, ease: "easeOut" as const }
     }
   };
 

@@ -72,7 +72,7 @@ const initialNodes = [
   { id: '6', type: 'custom', position: { x: 650, y: 200 }, data: { name: 'billing-namespace', type: 'Service', color: '#D3F531' } },
   
   { id: '7', type: 'custom', position: { x: 400, y: 350 }, data: { name: 'card-vault-bucket', type: 'Exposure', color: '#ef4444' } },
-];
+] as any[];
 
 const initialEdges = [
   { 

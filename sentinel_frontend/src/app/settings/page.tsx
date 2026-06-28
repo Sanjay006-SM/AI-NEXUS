@@ -53,7 +53,7 @@ export default function SettingsPage() {
     initial: { opacity: 0, y: 8 },
     animate: { opacity: 1, y: 0 },
     exit: { opacity: 0, y: -8 },
-    transition: { duration: prefersReducedMotion ? 0 : 0.18, ease: "easeOut" }
+    transition: { duration: prefersReducedMotion ? 0 : 0.18, ease: "easeOut" as const }
   };
   const buttonTransition = {
     whileTap: { scale: prefersReducedMotion ? 1 : 0.97 },
