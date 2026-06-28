@@ -10,7 +10,7 @@ export default function CtaBanner() {
         initial={{ scale: 0.96, opacity: 0 }}
         whileInView={{ scale: 1, opacity: 1 }}
         viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         className="landing-cta w-full max-w-[800px] mx-auto text-center px-6 py-[80px] md:px-12 flex flex-col items-center rounded-[24px]"
       >
         <h2 className="font-[family-name:var(--font-jakarta)] font-extrabold text-4xl md:text-5xl landing-text-primary mb-4">
