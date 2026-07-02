@@ -18,7 +18,7 @@ export default function Testimonials() {
 
   const testimonials = [
     {
-      quote: "SentryIQ caught a privilege escalation chain we had missed for 3 weeks. The AI investigation saved us 6 hours of forensic work.",
+      quote: "SentinelAI caught a privilege escalation chain we had missed for 3 weeks. The SentinelAI Copilot saved us 6 hours of forensic work.",
       name: "Sarah K.",
       role: "Lead Security Engineer, Series B Fintech"
     },

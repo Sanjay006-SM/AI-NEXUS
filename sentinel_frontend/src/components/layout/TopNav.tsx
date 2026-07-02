@@ -1,109 +1,133 @@
 "use client";
 
-import { Bell, Search, MessageSquare, Settings } from "lucide-react";
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { Bell, Search, MessageSquare, Settings, ShieldCheck, ShieldAlert, Sparkles, GitBranch, RefreshCw, HelpCircle } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useNotifications } from "@/lib/queries";
 
 export default function TopNav() {
-  const prefersReducedMotion = typeof window !== 'undefined' ? window.matchMedia('(prefers-reduced-motion: reduce)').matches : false;
+  const [showNotifications, setShowNotifications] = useState(false);
+  const { data: notifications = [], isLoading } = useNotifications();
+  
+  const unreadCount = notifications.filter((n: any) => !n.read).length;
 
-  const topNavVariants = {
-    hidden: { y: -20, opacity: 0 },
-    visible: { 
-      y: 0, 
-      opacity: 1,
-      transition: { duration: prefersReducedMotion ? 0 : 0.4, ease: "easeOut" as const, delay: prefersReducedMotion ? 0 : 0.1 }
+  const renderIcon = (type: string) => {
+    switch (type) {
+      case "CRITICAL": return <ShieldAlert className="w-4 h-4 text-rose-600" />;
+      case "PATH": return <GitBranch className="w-4 h-4 text-amber-600" />;
+      case "COPILOT": return <Sparkles className="w-4 h-4 text-indigo-600" />;
+      default: return <RefreshCw className="w-4 h-4 text-emerald-600" />;
     }
   };
 
-  const buttonVariants = {
-    hover: { scale: prefersReducedMotion ? 1 : 1.05, y: prefersReducedMotion ? 0 : -2 },
-    tap: { scale: prefersReducedMotion ? 1 : 0.95 }
-  };
-
   return (
-    <motion.header 
-      initial="hidden"
-      animate="visible"
-      variants={topNavVariants}
-      className="h-[80px] z-40 flex items-center justify-between px-6 mb-2 glass-premium rounded-[24px]"
-    >
+    <header className="h-[70px] z-40 flex items-center justify-between px-6 mb-4 bg-white border border-slate-200 rounded-2xl shadow-sm relative">
       <div className="flex items-center gap-6">
-        {/* Floating Glass Search Pill */}
-        <div className="relative group flex items-center">
-          <div className="absolute left-4 text-text-muted">
-            <Search className="w-4 h-4" />
-          </div>
+        <div className="relative flex items-center">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
             type="text"
-            placeholder="Search Here..."
-            className="search-pill h-11 w-64 md:w-80 rounded-[20px] pl-10 pr-12 text-sm text-text-primary placeholder:text-gray-500 bg-white/20 border border-white/40 backdrop-blur-md focus:outline-none transition-all shadow-sm"
+            placeholder="Quick search by identity or risk..."
+            className="h-10 w-64 md:w-80 rounded-xl pl-9 pr-4 text-xs text-slate-800 placeholder:text-slate-400 bg-slate-50 border border-slate-200 outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600/10 transition-all"
           />
-          <div className="absolute right-2 flex items-center">
-            <kbd className="inline-flex items-center justify-center h-7 px-2 rounded-xl text-[10px] font-bold bg-white/30 text-text-secondary border border-white/50 shadow-sm">
-              ⌘K
-            </kbd>
-          </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
-        {/* Settings Icon */}
-        <motion.button
-          variants={buttonVariants}
-          whileHover="hover"
-          whileTap="tap"
-          transition={{ type: "spring", stiffness: 400, damping: 17 }}
-          className="w-12 h-12 rounded-full flex items-center justify-center bg-white/30 border border-white/50 text-text-secondary hover:text-blue-600 hover:bg-white/50 transition-colors backdrop-blur-md shadow-sm"
-        >
-          <Settings className="w-5 h-5" />
-        </motion.button>
+      <div className="flex items-center gap-3">
+        {/* Notification Bell with interactive dropdown */}
+        <div className="relative">
+          <button
+            onClick={() => setShowNotifications(!showNotifications)}
+            className="relative w-10 h-10 rounded-xl flex items-center justify-center bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-600 transition-colors shadow-sm"
+          >
+            <Bell className="w-4.5 h-4.5" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 bg-rose-600 text-white text-[9px] font-extrabold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white animate-pulse">
+                {unreadCount}
+              </span>
+            )}
+          </button>
 
-        {/* Message Icon */}
-        <motion.button
-          variants={buttonVariants}
-          whileHover="hover"
-          whileTap="tap"
-          transition={{ type: "spring", stiffness: 400, damping: 17 }}
-          className="w-12 h-12 rounded-full flex items-center justify-center bg-white/30 border border-white/50 text-text-secondary hover:text-blue-600 hover:bg-white/50 transition-colors backdrop-blur-md shadow-sm"
-        >
-          <MessageSquare className="w-5 h-5" />
-        </motion.button>
+          <AnimatePresence>
+            {showNotifications && (
+              <>
+                {/* Backdrop Clicker */}
+                <div 
+                  className="fixed inset-0 z-40" 
+                  onClick={() => setShowNotifications(false)}
+                />
+                
+                {/* Dropdown Container */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute right-0 mt-2 w-80 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden"
+                >
+                  <div className="p-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-800">Notification Center</span>
+                    <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">
+                      {unreadCount} UNREAD
+                    </span>
+                  </div>
+                  
+                  <div className="max-h-72 overflow-y-auto divide-y divide-slate-100">
+                    {isLoading ? (
+                      <div className="p-4 text-xs text-center text-slate-500">Loading...</div>
+                    ) : notifications.length === 0 ? (
+                      <div className="p-4 text-xs text-center text-slate-500">No new notifications.</div>
+                    ) : (
+                      notifications.map((notif: any) => (
+                        <div 
+                          key={notif.id} 
+                          className={`p-3.5 hover:bg-slate-50 transition-colors flex gap-3 items-start ${
+                            !notif.read ? "bg-indigo-50/20" : ""
+                          }`}
+                        >
+                          <div className="p-1.5 bg-slate-100 rounded-lg mt-0.5">
+                            {renderIcon(notif.type)}
+                          </div>
+                          <div className="flex-1 flex flex-col gap-0.5">
+                            <div className="flex justify-between items-center">
+                              <span className="text-xs font-bold text-slate-900 leading-tight truncate w-36">{notif.title}</span>
+                              <span className="text-[9px] text-slate-400 font-mono">{new Date(notif.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                            </div>
+                            <p className="text-xs text-slate-500 leading-normal line-clamp-2">{notif.desc}</p>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
 
-        {/* Notification Icon */}
-        <motion.button
-          variants={buttonVariants}
-          whileHover="hover"
-          whileTap="tap"
-          transition={{ type: "spring", stiffness: 400, damping: 17 }}
-          className="relative w-12 h-12 rounded-full flex items-center justify-center bg-white/30 border border-white/50 text-text-secondary hover:text-blue-600 hover:bg-white/50 transition-colors backdrop-blur-md shadow-sm"
-        >
-          <Bell className="w-5 h-5" />
-          <span className="absolute top-3 right-3 w-2.5 h-2.5 bg-blue-500 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.8)] border-2 border-white"></span>
-        </motion.button>
-        
+                  <div className="p-3 border-t border-slate-100 bg-slate-50 text-center">
+                    <button 
+                      onClick={() => setShowNotifications(false)}
+                      className="text-[11px] font-bold text-indigo-600 hover:text-indigo-700"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
+        </div>
+
         {/* User Profile Glass Capsule */}
-        <motion.div 
-          whileHover={{ y: prefersReducedMotion ? 0 : -2, scale: prefersReducedMotion ? 1 : 1.02 }}
-          transition={{ type: "spring", stiffness: 400, damping: 17 }}
-          className="h-12 pl-1.5 pr-4 rounded-full flex items-center gap-3 bg-white/30 border border-white/50 backdrop-blur-md cursor-pointer hover:bg-white/40 transition-colors shadow-sm ml-2 relative"
-        >
+        <div className="h-10 pl-1.5 pr-3 rounded-xl flex items-center gap-2.5 bg-slate-50 border border-slate-200 shadow-sm ml-1">
           <div className="relative">
-            <div className="w-9 h-9 rounded-full bg-blue-500/20 border border-blue-500/40 flex items-center justify-center overflow-hidden text-blue-600 font-bold text-xs shadow-inner">
-              DO
+            <div className="w-7.5 h-7.5 rounded-lg bg-indigo-600 flex items-center justify-center overflow-hidden text-white font-bold text-xs">
+              AD
             </div>
-            <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
+            <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white" />
           </div>
           <div className="flex flex-col">
-            <span className="text-[13px] font-bold text-text-primary leading-tight">David Owner</span>
-            <span className="text-[10px] font-medium text-text-muted">Administrator</span>
+            <span className="text-[11px] font-bold text-slate-800 leading-tight">Admin</span>
+            <span className="text-[9px] font-medium text-slate-400">Workspace User</span>
           </div>
-          <div className="ml-1 w-4 h-4 flex items-center justify-center text-text-muted">
-            <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-        </motion.div>
+        </div>
       </div>
-    </motion.header>
+    </header>
   );
 }

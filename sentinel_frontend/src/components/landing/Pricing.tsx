@@ -13,19 +13,19 @@ export default function Pricing() {
   };
 
   const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } }
+    hidden: { opacity: 0, y: 15 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } }
   };
 
   return (
-    <section id="pricing" className="w-full py-24 relative z-10 overflow-hidden">
+    <section id="pricing" className="w-full py-24 relative z-10 overflow-hidden bg-slate-50 border-b border-slate-200">
       <div className="max-w-[1100px] mx-auto px-6">
         
         <div className="text-center mb-16">
-          <div className="inline-flex items-center justify-center px-4 py-1.5 rounded-full text-[#c8f135] text-[13px] font-semibold tracking-[0.04em] bg-[rgba(200,241,53,0.10)] border border-[rgba(200,241,53,0.25)] mb-4">
+          <div className="inline-flex items-center justify-center px-4 py-1.5 rounded-full text-indigo-700 text-[13px] font-semibold tracking-[0.04em] bg-indigo-50 border border-indigo-100 mb-4">
             SIMPLE PRICING
           </div>
-          <h2 className="font-[family-name:var(--font-jakarta)] font-extrabold text-4xl md:text-5xl landing-text-primary">
+          <h2 className="font-[family-name:var(--font-jakarta)] font-extrabold text-4xl md:text-5xl text-slate-900">
             No per-seat pricing. No surprises.
           </h2>
         </div>
@@ -35,37 +35,38 @@ export default function Pricing() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
-          className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-4 lg:gap-8"
+          className="flex flex-col md:flex-row items-stretch justify-center gap-6 md:gap-4 lg:gap-8"
         >
           {/* Starter */}
           <motion.div 
             variants={itemVariants}
-            className="landing-glass w-full max-w-sm p-8 flex flex-col transition-all duration-300 rounded-[24px]"
+            className="w-full max-w-sm p-8 flex flex-col transition-all duration-300 rounded-[24px] bg-white border border-slate-200 shadow-sm"
           >
-            <h3 className="font-[family-name:var(--font-jakarta)] text-2xl font-bold landing-text-primary mb-2">Starter</h3>
+            <h3 className="font-[family-name:var(--font-jakarta)] text-2xl font-bold text-slate-900 mb-2">Starter</h3>
             <div className="flex items-baseline gap-1 mb-2">
-              <span className="text-4xl font-extrabold landing-text-primary tracking-tight">$0</span>
-              <span className="landing-text-secondary font-medium">/ month</span>
+              <span className="text-4xl font-extrabold text-slate-900 tracking-tight">$0</span>
+              <span className="text-slate-500 font-medium">/ month</span>
             </div>
-            <p className="landing-text-secondary text-sm mb-8">Up to 500 identities</p>
+            <p className="text-slate-500 text-sm mb-8">Up to 500 identities</p>
             
             <div className="flex flex-col gap-4 mb-10 flex-1">
               {[
-                "CloudTrail ingestion",
-                "Risk scoring",
+                "CloudTrail JSON ingestion",
+                "Graph mapping in Neo4j",
+                "Incident risk scoring",
                 "7-day log retention",
-                "Email alerts"
+                "Dashboard alert metrics"
               ].map(f => (
                 <div key={f} className="flex items-center gap-3">
-                  <Check className="w-5 h-5 text-[#c8f135] shrink-0" />
-                  <span className="landing-text-secondary text-[15px]">{f}</span>
+                  <Check className="w-5 h-5 text-indigo-600 shrink-0" />
+                  <span className="text-slate-600 text-[15px]">{f}</span>
                 </div>
               ))}
             </div>
             
             <Link
-              href="/signup"
-              className="landing-btn-ghost w-full py-3.5 text-center font-semibold rounded-xl transition-colors"
+              href="/login?redirect=onboarding"
+              className="w-full py-3.5 text-center font-semibold rounded-xl border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 transition-colors"
             >
               Start Free
             </Link>
@@ -74,43 +75,40 @@ export default function Pricing() {
           {/* Pro */}
           <motion.div 
             variants={itemVariants}
-            className="landing-glass w-full max-w-sm p-8 flex flex-col relative z-10 scale-100 md:scale-[1.03] transition-all duration-300 rounded-[24px] !bg-[#1c2128] !border-t-[2px] !border-t-[#c8f135]"
+            className="w-full max-w-sm p-8 flex flex-col relative z-10 transition-all duration-300 rounded-[24px] bg-white border-2 border-indigo-600 shadow-md md:scale-[1.03]"
           >
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-              <div className="inline-flex items-center justify-center px-4 py-1 rounded-full text-white text-xs font-bold tracking-[0.04em] bg-[#6366f1] shadow-md">
+            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+              <div className="inline-flex items-center justify-center px-4 py-1 rounded-full text-white text-xs font-bold tracking-[0.04em] bg-indigo-600 shadow-md">
                 MOST POPULAR
               </div>
             </div>
 
-            <h3 className="font-[family-name:var(--font-jakarta)] text-2xl font-bold landing-text-primary mb-2 mt-2">Pro</h3>
+            <h3 className="font-[family-name:var(--font-jakarta)] text-2xl font-bold text-slate-900 mb-2 mt-2">Pro</h3>
             <div className="flex items-baseline gap-1 mb-2">
-              <span className="text-4xl font-extrabold landing-text-primary tracking-tight">$299</span>
-              <span className="landing-text-secondary font-medium">/ month</span>
+              <span className="text-4xl font-extrabold text-slate-900 tracking-tight">$299</span>
+              <span className="text-slate-500 font-medium">/ month</span>
             </div>
-            <p className="landing-text-secondary text-sm mb-8">Up to 10,000 identities</p>
+            <p className="text-slate-500 text-sm mb-8">Up to 10,000 identities</p>
             
             <div className="flex flex-col gap-4 mb-10 flex-1">
               {[
                 "Everything in Starter",
-                "AI Investigation panel",
+                "AI Security Analyst Copilot",
                 "Attack path visualization",
                 "90-day retention",
                 "Slack + PagerDuty alerts",
-                "API access"
+                "API access & integration tokens"
               ].map((f, i) => (
                 <div key={f} className="flex items-start gap-3">
-                  <Check className={`w-5 h-5 shrink-0 ${i === 0 ? "opacity-50 text-[#c8f135]" : "text-[#c8f135]"}`} />
-                  <span className="landing-text-secondary text-[15px]">{f}</span>
+                  <Check className="w-5 h-5 shrink-0 text-indigo-600" />
+                  <span className="text-slate-600 text-[15px]">{f}</span>
                 </div>
               ))}
             </div>
             
             <Link
-              href="/signup"
-              className="w-full py-3.5 text-center text-[#0d1117] bg-[#c8f135] font-bold rounded-xl hover:bg-[#d4f54a] transition-all hover:-translate-y-[1px]"
-              style={{ boxShadow: "0 4px 16px rgba(200, 241, 53, 0.25)" }}
-              onMouseEnter={(e) => e.currentTarget.style.boxShadow = "0 6px 24px rgba(200, 241, 53, 0.35)"}
-              onMouseLeave={(e) => e.currentTarget.style.boxShadow = "0 4px 16px rgba(200, 241, 53, 0.25)"}
+              href="/login?redirect=onboarding"
+              className="w-full py-3.5 text-center text-white bg-indigo-600 font-semibold rounded-xl hover:bg-indigo-700 transition-all shadow-md shadow-indigo-100"
             >
               Start Free Trial
             </Link>
@@ -119,33 +117,33 @@ export default function Pricing() {
           {/* Enterprise */}
           <motion.div 
             variants={itemVariants}
-            className="landing-glass w-full max-w-sm p-8 flex flex-col transition-all duration-300 rounded-[24px]"
+            className="w-full max-w-sm p-8 flex flex-col transition-all duration-300 rounded-[24px] bg-white border border-slate-200 shadow-sm"
           >
-            <h3 className="font-[family-name:var(--font-jakarta)] text-2xl font-bold landing-text-primary mb-2">Enterprise</h3>
+            <h3 className="font-[family-name:var(--font-jakarta)] text-2xl font-bold text-slate-900 mb-2">Enterprise</h3>
             <div className="flex items-baseline gap-1 mb-2">
-              <span className="text-4xl font-extrabold landing-text-primary tracking-tight">Custom</span>
+              <span className="text-4xl font-extrabold text-slate-900 tracking-tight">Custom</span>
             </div>
-            <p className="landing-text-secondary text-sm mb-8">Unlimited identities</p>
+            <p className="text-slate-500 text-sm mb-8">Unlimited identities</p>
             
             <div className="flex flex-col gap-4 mb-10 flex-1">
               {[
                 "Everything in Pro",
-                "SSO / SAML",
-                "Custom retention",
-                "Dedicated support",
-                "SLA guarantee",
-                "On-prem option"
+                "Multi-Tenant workspaces",
+                "Continuous AWS integration",
+                "Custom data retention",
+                "Dedicated support & SLAs",
+                "API Keys and SIEM webhook exports"
               ].map((f, i) => (
                 <div key={f} className="flex items-start gap-3">
-                  <Check className={`w-5 h-5 shrink-0 ${i === 0 ? "opacity-50 text-[#c8f135]" : "text-[#c8f135]"}`} />
-                  <span className="landing-text-secondary text-[15px]">{f}</span>
+                  <Check className="w-5 h-5 shrink-0 text-indigo-600" />
+                  <span className="text-slate-600 text-[15px]">{f}</span>
                 </div>
               ))}
             </div>
             
             <Link
-              href="/contact"
-              className="landing-btn-ghost w-full py-3.5 text-center font-semibold rounded-xl transition-colors"
+              href="/login"
+              className="w-full py-3.5 text-center font-semibold rounded-xl border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 transition-colors"
             >
               Contact Sales
             </Link>

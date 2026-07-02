@@ -1,104 +1,79 @@
 "use client";
 
 import { motion, Variants } from "framer-motion";
-import { Cloud, BrainCircuit, ShieldCheck } from "lucide-react";
+import { CheckCircle } from "lucide-react";
 
 export default function HowItWorks() {
+  const steps = [
+    { num: "01", name: "Organization", desc: "Initialize your secure SaaS tenant" },
+    { num: "02", name: "AWS", desc: "Select target cloud environments" },
+    { num: "03", name: "CloudTrail", desc: "Ingest security audit trail logs" },
+    { num: "04", name: "Identity Discovery", desc: "Discover machine roles & service users" },
+    { num: "05", name: "Graph Intelligence", desc: "Map active relationship links in Neo4j" },
+    { num: "06", name: "Risk Engine", desc: "Evaluate risk factor weights" },
+    { num: "07", name: "AI Copilot", desc: "Query machine profiles with natural AI reasoning" },
+    { num: "08", name: "Executive Dashboard", desc: "Monitor live metrics & blast radius graphs" },
+    { num: "09", name: "Remediation", desc: "Apply least privilege controls" }
+  ];
+
   const containerVariants: Variants = {
     hidden: {},
     visible: {
-      transition: { staggerChildren: 0.12 }
+      transition: { staggerChildren: 0.05 }
     }
   };
 
   const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } }
+    hidden: { opacity: 0, y: 10 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] } }
   };
 
   return (
-    <section id="how-it-works" className="w-full py-24 relative z-10">
+    <section id="how-it-works" className="w-full py-24 relative z-10 bg-slate-50">
       <div className="max-w-[1100px] mx-auto px-6">
         
-        <div className="text-center mb-20">
-          <div className="inline-flex items-center justify-center px-4 py-1.5 rounded-full text-[#c8f135] text-[13px] font-semibold tracking-[0.04em] bg-[rgba(200,241,53,0.10)] border border-[rgba(200,241,53,0.25)] mb-4">
-            SETUP IN MINUTES
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center justify-center px-4 py-1.5 rounded-full text-indigo-700 text-[13px] font-semibold tracking-[0.04em] bg-indigo-50 border border-indigo-100 mb-4">
+            INGESTION TO RESOLUTION
           </div>
-          <h2 className="font-[family-name:var(--font-jakarta)] font-extrabold text-4xl md:text-5xl landing-text-primary">
-            From zero to protected in 3 steps.
+          <h2 className="font-[family-name:var(--font-jakarta)] font-extrabold text-3xl md:text-5xl text-slate-900">
+            How SentinelAI Works
           </h2>
+          <p className="text-slate-600 text-base md:text-lg max-w-2xl mx-auto mt-4">
+            A pipeline engineered to transform raw API log events into real-time threat intelligence.
+          </p>
         </div>
 
+        {/* Stepper workflow list */}
         <motion.div 
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
-          className="relative flex flex-col md:flex-row gap-6 md:gap-8"
+          className="grid grid-cols-1 md:grid-cols-3 gap-6"
         >
-          {/* Connecting Line (Desktop Only) */}
-          <div className="hidden md:block absolute top-[100px] left-[10%] right-[10%] border-t-2 border-dashed border-[rgba(200,241,53,0.25)] z-0" />
-
-          {/* Step 1 */}
-          <motion.div variants={itemVariants} className="flex-1 relative z-10">
-            <div className="landing-glass relative overflow-hidden p-8 flex flex-col items-center text-center group transition-all duration-300 hover:-translate-y-1 h-full rounded-[20px]">
-              {/* Watermark */}
-              <div className="absolute -right-4 -bottom-8 font-[family-name:var(--font-jakarta)] font-extrabold text-[120px] text-[rgba(200,241,53,0.08)] leading-none select-none pointer-events-none">
-                01
+          {steps.map((s, idx) => (
+            <motion.div 
+              key={idx} 
+              variants={itemVariants}
+              className="bg-white border border-slate-200 rounded-[20px] p-6 flex flex-col justify-between hover:border-indigo-200 transition-all shadow-sm group"
+            >
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-xs font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 rounded px-2.5 py-1">
+                    STEP {s.num}
+                  </span>
+                  <CheckCircle className="w-4 h-4 text-slate-300 group-hover:text-indigo-600 transition-colors" />
+                </div>
+                <h3 className="font-[family-name:var(--font-jakarta)] text-base font-bold text-slate-900 mb-2">
+                  {s.name}
+                </h3>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  {s.desc}
+                </p>
               </div>
-              
-              <div className="w-16 h-16 rounded-2xl bg-[rgba(200,241,53,0.10)] border border-[rgba(200,241,53,0.20)] flex items-center justify-center mb-6 shadow-sm relative z-10">
-                <Cloud className="w-7 h-7 text-[#c8f135]" />
-              </div>
-              <h3 className="font-[family-name:var(--font-jakarta)] text-xl font-bold landing-text-primary mb-3 relative z-10">
-                Connect CloudTrail
-              </h3>
-              <p className="landing-text-secondary text-base leading-relaxed relative z-10">
-                Point SentryIQ to your AWS account. We start streaming events immediately with zero agents.
-              </p>
-            </div>
-          </motion.div>
-
-          {/* Step 2 */}
-          <motion.div variants={itemVariants} className="flex-1 relative z-10">
-            <div className="landing-glass relative overflow-hidden p-8 flex flex-col items-center text-center group transition-all duration-300 hover:-translate-y-1 h-full rounded-[20px]">
-              {/* Watermark */}
-              <div className="absolute -right-4 -bottom-8 font-[family-name:var(--font-jakarta)] font-extrabold text-[120px] text-[rgba(200,241,53,0.08)] leading-none select-none pointer-events-none">
-                02
-              </div>
-              
-              <div className="w-16 h-16 rounded-2xl bg-[rgba(200,241,53,0.10)] border border-[rgba(200,241,53,0.20)] flex items-center justify-center mb-6 shadow-sm relative z-10">
-                <BrainCircuit className="w-7 h-7 text-[#c8f135]" />
-              </div>
-              <h3 className="font-[family-name:var(--font-jakarta)] text-xl font-bold landing-text-primary mb-3 relative z-10">
-                AI Scores Every Identity
-              </h3>
-              <p className="landing-text-secondary text-base leading-relaxed relative z-10">
-                Our risk engine analyzes 47 behavioral signals and scores each machine identity in real time.
-              </p>
-            </div>
-          </motion.div>
-
-          {/* Step 3 */}
-          <motion.div variants={itemVariants} className="flex-1 relative z-10">
-            <div className="landing-glass relative overflow-hidden p-8 flex flex-col items-center text-center group transition-all duration-300 hover:-translate-y-1 h-full rounded-[20px]">
-              {/* Watermark */}
-              <div className="absolute -right-4 -bottom-8 font-[family-name:var(--font-jakarta)] font-extrabold text-[120px] text-[rgba(200,241,53,0.08)] leading-none select-none pointer-events-none">
-                03
-              </div>
-              
-              <div className="w-16 h-16 rounded-2xl bg-[rgba(200,241,53,0.10)] border border-[rgba(200,241,53,0.20)] flex items-center justify-center mb-6 shadow-sm relative z-10">
-                <ShieldCheck className="w-7 h-7 text-[#c8f135]" />
-              </div>
-              <h3 className="font-[family-name:var(--font-jakarta)] text-xl font-bold landing-text-primary mb-3 relative z-10">
-                Investigate & Remediate
-              </h3>
-              <p className="landing-text-secondary text-base leading-relaxed relative z-10">
-                Get alerted on anomalies, visualize attack paths, and let AI write your incident reports.
-              </p>
-            </div>
-          </motion.div>
-
+            </motion.div>
+          ))}
         </motion.div>
       </div>
     </section>

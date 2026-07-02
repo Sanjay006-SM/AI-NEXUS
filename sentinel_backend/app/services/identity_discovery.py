@@ -11,7 +11,7 @@ class IdentityDiscoveryEngine:
     def __init__(self, db: Session):
         self.db = db
 
-    def discover_identity(self, arn: str, identity_type: str, account_id: str, event_time: datetime) -> MachineIdentity:
+    def discover_identity(self, arn: str, identity_type: str, account_id: str, event_time: datetime, workspace_id: str) -> MachineIdentity:
         """
         Discovers a machine identity. If it exists, updates last_seen and increments total_events.
         If it does not exist, creates it.
@@ -27,7 +27,10 @@ class IdentityDiscoveryEngine:
             normalized_type = "AWSService"
 
         # Look up existing identity
-        stmt = select(MachineIdentity).where(MachineIdentity.arn == arn)
+        stmt = select(MachineIdentity).where(
+            MachineIdentity.arn == arn,
+            MachineIdentity.workspace_id == workspace_id
+        )
         identity = self.db.execute(stmt).scalar_one_or_none()
 
         if identity:
@@ -41,6 +44,7 @@ class IdentityDiscoveryEngine:
         else:
             # Create new
             identity = MachineIdentity(
+                workspace_id=workspace_id,
                 arn=arn,
                 identity_type=normalized_type,
                 account_id=account_id,

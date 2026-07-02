@@ -75,7 +75,7 @@ export default function ThreatGraphCanvas({ identityId }: { identityId: string }
   }, [data]);
 
   if (isLoading) {
-    return <div className="h-full flex items-center justify-center text-[#06b6d4] animate-pulse">Loading Attack Graph...</div>;
+    return <div className="h-full flex items-center justify-center text-indigo-600 animate-pulse">Loading Investigations...</div>;
   }
 
   return (

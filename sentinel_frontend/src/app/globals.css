@@ -1,1332 +1,631 @@
 @import "tailwindcss";
 
+/* ============================================================================
+   SentinelAI Enterprise Design System
+   Premium Light Theme — Stripe / Linear / Vercel inspired
+   ============================================================================ */
+
 @theme {
-  /* -------------------------------------------------------------------------- */
-  /* Liquid Glass Design System                                                 */
-  /* -------------------------------------------------------------------------- */
-  
-  /* Primary Accent - Neon Lime from Reference */
-  --color-primary: #D3F531;
-  --color-primary-hover: #bde026;
-  
-  /* Text */
-  --color-text-primary: #ffffff;
-  --color-text-secondary: #9ca3af;
-  --color-text-muted: #6b7280;
-  
-  /* Borders */
-  --color-border: rgba(255, 255, 255, 0.08);
-  --color-border-subtle: rgba(255, 255, 255, 0.04);
-  
-  /* Severities */
-  --color-critical: #ef4444;
-  --color-high: #f97316;
-  --color-medium: #eab308;
-  --color-low: #22c55e;
-  
-  /* Legacy Mappings */
-  --color-success: #D3F531; /* Map success to the neon brand color */
-  --color-warning: #f97316;
-  --color-danger: #ef4444;
-  --color-purple: #8B5CF6;
-  --color-cyan: #06b6d4;
+  /* --- Primary Brand --- */
+  --color-primary: #4F46E5;
+  --color-primary-hover: #4338CA;
+
+  /* --- Text --- */
+  --color-text-primary: #0F172A;
+  --color-text-secondary: #334155;
+  --color-text-muted: #64748B;
+
+  /* --- Borders --- */
+  --color-border: #E2E8F0;
+  --color-border-subtle: #F1F5F9;
+
+  /* --- Severity --- */
+  --color-critical: #DC2626;
+  --color-high: #EA580C;
+  --color-medium: #D97706;
+  --color-low: #16A34A;
+
+  /* --- Semantic --- */
+  --color-success: #16A34A;
+  --color-warning: #D97706;
+  --color-danger: #DC2626;
+  --color-info: #2563EB;
+  --color-purple: #7C3AED;
+  --color-cyan: #0891B2;
 }
+
+/* ============================================================================
+   Base Styles
+   ============================================================================ */
 
 @layer base {
   body {
-    background-color: #0f1115;
-    background-image: url('https://images.unsplash.com/photo-1618220179428-22790b46a0eb?q=80&w=2574&auto=format&fit=crop');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
+    background-color: #F8FAFC;
     color: var(--color-text-primary);
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
   }
-  
-  /* Add an overlay to the body to darken the image slightly */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.6);
-    z-index: -1;
-  }
-  
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 10px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.4);
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
+  ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+  /* Selection */
+  ::selection {
+    background: rgba(79, 70, 229, 0.15);
+    color: #1E1B4B;
   }
 }
 
+/* ============================================================================
+   Component Layer — Core Primitives
+   ============================================================================ */
+
 @layer components {
-  /* -------------------------------------------------------------------------- */
-  /* Liquid Glass Panels (Replacing Light Mode Cards)                           */
-  /* -------------------------------------------------------------------------- */
+
+  /* --------------------------------------------------------------------------
+     Cards
+     -------------------------------------------------------------------------- */
   .card, .glass-panel, .lg-surface {
     position: relative;
-    background: rgba(20, 22, 26, 0.45);
-    backdrop-filter: blur(24px) saturate(150%);
-    -webkit-backdrop-filter: blur(24px) saturate(150%);
-    border-radius: 1.5rem;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow:
-      inset 0 1px 1px rgba(255, 255, 255, 0.1),
-      inset 0 -1px 1px rgba(0, 0, 0, 0.4),
-      0 8px 32px rgba(0, 0, 0, 0.4);
+    background: #FFFFFF;
+    border-radius: 12px;
+    border: 1px solid #E2E8F0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
     padding: 1.5rem;
-    transition: transform 250ms ease, box-shadow 250ms ease;
+    transition: box-shadow 200ms ease, border-color 200ms ease;
     overflow: hidden;
   }
-  
+
   .card:hover, .lg-surface:hover {
-    box-shadow:
-      inset 0 1px 1px rgba(255, 255, 255, 0.15),
-      inset 0 -1px 1px rgba(0, 0, 0, 0.4),
-      0 12px 48px rgba(0, 0, 0, 0.5);
-    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+    border-color: #CBD5E1;
   }
-  
+
   .card::before, .lg-surface::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 100%);
-    pointer-events: none;
-    z-index: 0;
+    display: none;
   }
-  
+
   .card > *, .lg-surface > * {
     position: relative;
     z-index: 1;
   }
 
-  /* -------------------------------------------------------------------------- */
-  /* Semantic Glass Background Utilities                                        */
-  /* -------------------------------------------------------------------------- */
-  .bg-glass-subtle {
-    background: rgba(255, 255, 255, 0.05);
-  }
-  .bg-glass-active {
-    background: rgba(255, 255, 255, 0.1);
-  }
-  .border-glass-subtle {
-    border-color: rgba(255, 255, 255, 0.1);
-  }
-  .border-glass-active {
-    border-color: rgba(255, 255, 255, 0.2);
+  /* --------------------------------------------------------------------------
+     Glass Utilities (mapped to solid enterprise equivalents)
+     -------------------------------------------------------------------------- */
+  .bg-glass-subtle { background: #F8FAFC; }
+  .bg-glass-active { background: #F1F5F9; }
+  .border-glass-subtle { border-color: #E2E8F0; }
+  .border-glass-active { border-color: #CBD5E1; }
+
+  /* --------------------------------------------------------------------------
+     Glass Premium (Sidebar / TopNav shell)
+     -------------------------------------------------------------------------- */
+  .glass-premium {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   }
 
-  /* -------------------------------------------------------------------------- */
-  /* Button Styles                                                              */
-  /* -------------------------------------------------------------------------- */
+  /* --------------------------------------------------------------------------
+     Buttons
+     -------------------------------------------------------------------------- */
   .btn {
-    @apply inline-flex items-center justify-center rounded-xl font-medium transition-all duration-200 ease-in-out focus-visible:outline-none disabled:opacity-50 disabled:pointer-events-none;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    @apply inline-flex items-center justify-center rounded-lg font-semibold transition-all duration-150 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary disabled:opacity-50 disabled:pointer-events-none;
   }
-  
+
   .btn-sm { @apply h-8 px-3 text-xs; }
   .btn-md { @apply h-10 px-4 py-2 text-sm; }
-  .btn-lg { @apply h-12 px-8 text-base; }
+  .btn-lg { @apply h-12 px-6 text-base; }
 
   .btn-primary {
-    background: var(--color-primary);
-    color: #000000;
-    font-weight: 700;
+    background: #4F46E5;
+    color: #FFFFFF;
+    font-weight: 600;
     border: none;
-    box-shadow: 0 0 15px rgba(211, 245, 49, 0.3);
+    box-shadow: 0 1px 2px rgba(79, 70, 229, 0.2);
   }
   .btn-primary:hover {
-    background: var(--color-primary-hover);
-    box-shadow: 0 0 25px rgba(211, 245, 49, 0.5);
-    transform: scale(1.02);
-  }
-  
-  .btn-secondary {
-    background: rgba(255, 255, 255, 0.05);
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-  }
-  .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.25);
-  }
-  
-  .btn-danger {
-    background: rgba(239, 68, 68, 0.2);
-    color: #ef4444;
-    border: 1px solid rgba(239, 68, 68, 0.3);
-  }
-  .btn-danger:hover {
-    background: rgba(239, 68, 68, 0.3);
+    background: #4338CA;
+    box-shadow: 0 2px 6px rgba(79, 70, 229, 0.3);
+    transform: translateY(-1px);
   }
 
-  /* -------------------------------------------------------------------------- */
-  /* Input Styles                                                               */
-  /* -------------------------------------------------------------------------- */
+  .btn-secondary {
+    background: #FFFFFF;
+    color: #334155;
+    border: 1px solid #E2E8F0;
+  }
+  .btn-secondary:hover {
+    background: #F8FAFC;
+    border-color: #CBD5E1;
+    color: #0F172A;
+  }
+
+  .btn-danger {
+    background: #FEF2F2;
+    color: #DC2626;
+    border: 1px solid #FECACA;
+  }
+  .btn-danger:hover {
+    background: #FEE2E2;
+  }
+
+  /* --------------------------------------------------------------------------
+     Inputs
+     -------------------------------------------------------------------------- */
   .input-field, .lg-input {
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    color: #ffffff;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    color: #0F172A;
     padding: 0.5rem 1rem;
-    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.3);
-    transition: all 200ms ease;
-    @apply flex h-10 w-full text-sm placeholder:text-gray-500;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+    @apply flex h-10 w-full text-sm placeholder:text-slate-400;
   }
   .input-field:focus, .lg-input:focus {
     outline: none;
-    border-color: var(--color-primary);
-    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.3), 0 0 0 2px rgba(211, 245, 49, 0.2);
+    border-color: #4F46E5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
   }
 
-  /* -------------------------------------------------------------------------- */
-  /* Badge Styles                                                               */
-  /* -------------------------------------------------------------------------- */
+  /* --------------------------------------------------------------------------
+     Badges
+     -------------------------------------------------------------------------- */
   .badge {
-    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold tracking-wide uppercase transition-colors;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold tracking-wide transition-colors;
+    background: #F1F5F9;
+    color: #475569;
+    border: 1px solid #E2E8F0;
   }
-  
+
   .badge-primary {
-    background: rgba(211, 245, 49, 0.15);
-    color: var(--color-primary);
-    border: 1px solid rgba(211, 245, 49, 0.3);
+    background: #EEF2FF;
+    color: #4F46E5;
+    border: 1px solid #C7D2FE;
   }
   .badge-success {
-    background: rgba(211, 245, 49, 0.15);
-    color: var(--color-primary);
-    border: 1px solid rgba(211, 245, 49, 0.3);
+    background: #F0FDF4;
+    color: #16A34A;
+    border: 1px solid #BBF7D0;
   }
   .badge-warning {
-    background: rgba(249, 115, 22, 0.15);
-    color: #f97316;
-    border: 1px solid rgba(249, 115, 22, 0.3);
+    background: #FFFBEB;
+    color: #D97706;
+    border: 1px solid #FDE68A;
   }
   .badge-danger {
-    background: rgba(239, 68, 68, 0.15);
-    color: #ef4444;
-    border: 1px solid rgba(239, 68, 68, 0.3);
-  }
-}
-
-@layer base {
-  /* -------------------------------------------------------------------------- */
-  /* Light Theme Overrides                                                      */
-  /* -------------------------------------------------------------------------- */
-  html.light-theme body {
-    background: #f4f7fb !important;
-    background-image:
-      radial-gradient(circle at 10% 10%, rgba(59, 130, 246, 0.15) 0%, transparent 40%),
-      radial-gradient(circle at 90% 20%, rgba(168, 85, 247, 0.15) 0%, transparent 40%),
-      radial-gradient(circle at 50% 90%, rgba(6, 182, 212, 0.15) 0%, transparent 40%) !important;
-    color: #0f172a;
-    min-height: 100vh;
-  }
-  
-  html.light-theme body::before {
-    display: none;
+    background: #FEF2F2;
+    color: #DC2626;
+    border: 1px solid #FECACA;
   }
 
-  html.light-theme {
-    --color-text-primary: #0f172a;
-    --color-text-secondary: #334155;
-    --color-text-muted: #475569;
-    --color-border: rgba(0, 0, 0, 0.1);
-    --color-border-subtle: rgba(0, 0, 0, 0.05);
+  /* --------------------------------------------------------------------------
+     Active Nav Pill (Sidebar)
+     -------------------------------------------------------------------------- */
+  .nav-pill-active {
+    background: #EEF2FF;
+    color: #4F46E5 !important;
+    font-weight: 600;
+    border: 1px solid #C7D2FE;
   }
 
-  html.light-theme .card,
-  html.light-theme .glass-panel,
-  html.light-theme .lg-surface {
-    background: rgba(255, 255, 255, 0.75) !important;
-    border: 1px solid rgba(255, 255, 255, 0.9) !important;
-    box-shadow: 
-      0 8px 32px rgba(15, 23, 42, 0.08), 
-      inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+  /* --------------------------------------------------------------------------
+     Search Pill
+     -------------------------------------------------------------------------- */
+  .search-pill {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    color: #0F172A;
+  }
+  .search-pill::placeholder { color: #94A3B8; }
+  .search-pill:focus, .search-pill:focus-within {
+    border-color: #4F46E5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    outline: none;
   }
 
-  html.light-theme .card:hover,
-  html.light-theme .lg-surface:hover {
-    box-shadow: 
-      0 12px 48px rgba(15, 23, 42, 0.12), 
-      inset 0 1px 0 rgba(255, 255, 255, 1) !important;
-  }
-
-  html.light-theme .input-field,
-  html.light-theme .lg-input {
-    background: rgba(255, 255, 255, 0.5) !important;
-    border: 1px solid rgba(15, 23, 42, 0.1) !important;
-    color: #0f172a !important;
-    box-shadow: inset 0 2px 4px rgba(15, 23, 42, 0.05) !important;
-  }
-
-  html.light-theme .btn-secondary {
-    background: rgba(15, 23, 42, 0.05) !important;
-    color: #0f172a !important;
-    border: 1px solid rgba(15, 23, 42, 0.15) !important;
-  }
-
-  html.light-theme .btn-secondary:hover {
-    background: rgba(15, 23, 42, 0.1) !important;
-    border-color: rgba(15, 23, 42, 0.25) !important;
-  }
-
-  /* Light Theme Semantic Glass Overrides */
-  html.light-theme .bg-glass-subtle {
-    background: rgba(0, 0, 0, 0.03) !important;
-  }
-  html.light-theme .bg-glass-active {
-    background: rgba(0, 0, 0, 0.06) !important;
-  }
-  html.light-theme .border-glass-subtle {
-    border-color: rgba(0, 0, 0, 0.08) !important;
-  }
-  html.light-theme .border-glass-active {
-    border-color: rgba(0, 0, 0, 0.15) !important;
-  }
-
-  /* -------------------------------------------------------------------------- */
-  /* User Requested Light Theme Specific Styles                                 */
-  /* -------------------------------------------------------------------------- */
-  
-  /* Sidebar */
-  html.light-theme .light-sidebar {
-    background: rgba(255, 255, 255, 0.65) !important;
-    backdrop-filter: blur(24px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
-    border-right: 1px solid rgba(255, 255, 255, 0.75) !important;
-    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.05), inset -1px 0 0 rgba(255,255,255,0.80) !important;
-  }
-  html.light-theme .light-sidebar,
-  html.light-theme .light-sidebar .text-text-primary,
-  html.light-theme .light-sidebar .font-bold {
-    color: #0f172a !important;
-  }
-  html.light-theme .light-sidebar .text-text-muted,
-  html.light-theme .light-sidebar .text-\[11px\] {
-    color: #475569 !important;
-  }
-  html.light-theme .light-sidebar .sidebar-icon {
-    color: #94a3b8 !important;
-  }
-  html.light-theme .light-sidebar .sidebar-nav-item:not(.active) {
-    color: #475569 !important;
-  }
-  html.light-theme .light-sidebar .sidebar-nav-item.active {
-    color: #6366f1 !important;
-  }
-  html.light-theme .light-sidebar .sidebar-nav-item.active .sidebar-icon-container {
-    background: rgba(99, 102, 241, 0.10) !important;
-    color: #6366f1 !important;
-  }
-  html.light-theme .light-sidebar .sidebar-active-indicator {
-    background: #6366f1 !important;
-    border-left: 3px solid #6366f1 !important;
-    width: 3px !important;
-    box-shadow: none !important;
-  }
-  html.light-theme .light-sidebar .workspace-label {
-    color: #94a3b8 !important;
-  }
-  html.light-theme .light-sidebar .trading-bots-section {
-    background: rgba(255,255,255,0.50) !important;
-    border: 1px solid rgba(203,213,225,0.5) !important;
-  }
-  html.light-theme .light-sidebar .trading-bots-section .text-text-primary {
-    color: #0f172a !important;
-  }
-  html.light-theme .light-sidebar .production-pill {
-    background: #f1f5f9 !important;
-    border: 1px solid #e2e8f0 !important;
-    color: #0f172a !important;
-  }
-  html.light-theme .light-sidebar .owner-name {
-    color: #0f172a !important;
-  }
-  html.light-theme .light-sidebar .owner-email {
-    color: #475569 !important;
-  }
-
-  /* Topbar */
-  html.light-theme .light-topnav {
-    background: rgba(240, 244, 248, 0.80) !important;
-    backdrop-filter: blur(20px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.70) !important;
-    box-shadow: 0 1px 12px rgba(0,0,0,0.04) !important;
-  }
-  html.light-theme .light-topnav .search-input {
-    background: rgba(255, 255, 255, 0.60) !important;
-    border: 1px solid rgba(203, 213, 225, 0.70) !important;
-    color: #0f172a !important;
-    backdrop-filter: blur(8px) !important;
-    -webkit-backdrop-filter: blur(8px) !important;
-  }
-  html.light-theme .light-topnav .search-input::placeholder {
-    color: #94a3b8 !important;
-  }
-  html.light-theme .light-topnav .owner-name { color: #0f172a !important; }
-  html.light-theme .light-topnav .owner-email { color: #475569 !important; }
-  html.light-theme .light-topnav .icon-btn { color: #475569 !important; }
-
-  /* Command Center Hero */
-  html.light-theme .light-hero {
-    background: rgba(255, 255, 255, 0.52) !important;
-    backdrop-filter: blur(24px) saturate(180%) brightness(1.04) !important;
-    -webkit-backdrop-filter: blur(24px) saturate(180%) brightness(1.04) !important;
-    border: 1px solid rgba(255, 255, 255, 0.80) !important;
-    border-radius: 20px !important;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
-  }
-  html.light-theme .light-hero .hero-heading { color: #0f172a !important; }
-  html.light-theme .light-hero .hero-subtext { color: #475569 !important; }
-  html.light-theme .light-hero .quick-actions-label { color: #94a3b8 !important; }
-  
-  html.light-theme .light-btn-investigate {
-    background: #6366f1 !important;
-    color: #ffffff !important;
-    border: none !important;
-    border-radius: 10px !important;
-    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35) !important;
-  }
-  html.light-theme .light-btn-investigate:hover {
-    background: #4f46e5 !important;
-    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45) !important;
-  }
-
-  html.light-theme .light-btn-ask-ai {
-    background: rgba(255, 255, 255, 0.55) !important;
-    border: 1px solid rgba(203, 213, 225, 0.70) !important;
-    color: #0f172a !important;
-    border-radius: 10px !important;
-    backdrop-filter: blur(8px) !important;
-    -webkit-backdrop-filter: blur(8px) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.90) !important;
-  }
-  html.light-theme .light-btn-ask-ai:hover {
-    background: rgba(255, 255, 255, 0.80) !important;
-    border-color: rgba(99, 102, 241, 0.35) !important;
-  }
-
-  html.light-theme .light-btn-quick {
-    background: rgba(255, 255, 255, 0.50) !important;
-    border: 1px solid rgba(203, 213, 225, 0.65) !important;
-    color: #0f172a !important;
-    border-radius: 10px !important;
-    backdrop-filter: blur(8px) !important;
-    -webkit-backdrop-filter: blur(8px) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.90) !important;
-  }
-  html.light-theme .light-btn-quick:hover {
-    background: rgba(255, 255, 255, 0.75) !important;
-    border-color: rgba(99, 102, 241, 0.30) !important;
-  }
-
-  html.light-theme .light-stat-pill {
-    background: rgba(255, 255, 255, 0.55) !important;
-    border: 1px solid rgba(203, 213, 225, 0.60) !important;
-    color: #475569 !important;
-    border-radius: 100px !important;
-    backdrop-filter: blur(6px) !important;
-    -webkit-backdrop-filter: blur(6px) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.90) !important;
-  }
-
-  /* Platform Metrics bar */
-  html.light-theme .light-platform-metrics {
-    background: rgba(255, 255, 255, 0.52) !important;
-    backdrop-filter: blur(20px) saturate(160%) !important;
-    -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.75) !important;
-    border-radius: 16px !important;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.95) !important;
-  }
-  html.light-theme .light-platform-metrics .metrics-label {
-    color: #94a3b8 !important;
-  }
-  html.light-theme .light-platform-metrics .metrics-value,
-  html.light-theme .light-platform-metrics .text-text-primary {
-    color: #0f172a !important;
-    font-weight: 600 !important;
-  }
-
-  /* KPI cards */
-  html.light-theme .light-kpi-card {
-    background: rgba(255, 255, 255, 0.52) !important;
-    backdrop-filter: blur(20px) saturate(160%) !important;
-    -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.75) !important;
-    border-radius: 16px !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
-  }
-  html.light-theme .light-kpi-card .kpi-label { color: #94a3b8 !important; }
-  html.light-theme .light-kpi-card .kpi-value { color: #0f172a !important; font-weight: 700 !important; }
-  html.light-theme .light-kpi-card .kpi-subtext { color: #475569 !important; }
-  
-  html.light-theme .light-badge-monitoring {
-    background: rgba(59,130,246,0.10) !important;
-    color: #1d4ed8 !important;
-    border: 1px solid rgba(59,130,246,0.20) !important;
-  }
-  html.light-theme .light-badge-healthy {
-    background: rgba(22,163,74,0.10) !important;
-    color: #166534 !important;
-    border: 1px solid rgba(22,163,74,0.20) !important;
-  }
-  html.light-theme .light-badge-attention {
-    background: rgba(234,179,8,0.10) !important;
-    color: #92400e !important;
-    border: 1px solid rgba(234,179,8,0.20) !important;
-  }
-  html.light-theme .light-badge-processing {
-    background: rgba(139,92,246,0.10) !important;
-    color: #6d28d9 !important;
-    border: 1px solid rgba(139,92,246,0.20) !important;
-  }
-  html.light-theme .light-kpi-icon {
-    background: rgba(241,245,249,0.80) !important;
-  }
-  html.light-theme .light-kpi-icon svg {
-    color: #6366f1 !important;
-  }
-
-  /* -------------------------------------------------------------------------- */
-  /* Risk Findings Page Light Overrides                                         */
-  /* -------------------------------------------------------------------------- */
-  html.light-theme .light-rf-pill {
-    background: rgba(255, 255, 255, 0.60) !important;
-    backdrop-filter: blur(10px) saturate(160%) !important;
-    -webkit-backdrop-filter: blur(10px) saturate(160%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.75) !important;
-    border-radius: 10px !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
-    color: #0f172a !important;
-    font-weight: 600 !important;
-  }
-  
-  html.light-theme .light-rf-filter {
-    background: rgba(255, 255, 255, 0.55) !important;
-    backdrop-filter: blur(16px) saturate(160%) !important;
-    -webkit-backdrop-filter: blur(16px) saturate(160%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.75) !important;
-    border-radius: 14px !important;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
-  }
-  html.light-theme .light-rf-filter select,
-  html.light-theme .light-rf-filter .filter-dropdown {
-    color: #475569 !important;
-  }
-  html.light-theme .light-rf-filter select:hover,
-  html.light-theme .light-rf-filter .filter-dropdown:hover {
-    background: rgba(99,102,241,0.06) !important;
-    color: #6366f1 !important;
-  }
-  html.light-theme .light-rf-filter input {
-    color: #0f172a !important;
-  }
-  html.light-theme .light-rf-filter input::placeholder {
-    color: #94a3b8 !important;
-  }
-
-  html.light-theme .light-rf-card {
-    background: rgba(255, 255, 255, 0.58) !important;
-    backdrop-filter: blur(18px) saturate(170%) !important;
-    -webkit-backdrop-filter: blur(18px) saturate(170%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.78) !important;
-    border-radius: 16px !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
-    transition: box-shadow 200ms ease, transform 200ms ease !important;
-  }
-  html.light-theme .light-rf-card:hover {
-    transform: translateY(-1px) !important;
-    box-shadow: 0 8px 32px rgba(99, 102, 241, 0.10), inset 0 1px 0 rgba(255, 255, 255, 1.0) !important;
-  }
-  
-  html.light-theme .light-rf-card.severity-critical { border-left: 3px solid #dc2626 !important; }
-  html.light-theme .light-rf-card.severity-high { border-left: 3px solid #ea580c !important; }
-  html.light-theme .light-rf-card.severity-medium { border-left: 3px solid #ca8a04 !important; }
-  html.light-theme .light-rf-card.severity-low { border-left: 3px solid #16a34a !important; }
-
-  html.light-theme .light-rf-card .finding-title { color: #0f172a !important; font-weight: 600 !important; }
-  html.light-theme .light-rf-card .finding-identity {
-    background: rgba(20, 184, 166, 0.08) !important;
-    border: 1px solid rgba(20, 184, 166, 0.20) !important;
-    color: #0d9488 !important; /* Keep teal color */
-    border-radius: 6px !important;
-    padding: 2px 8px !important;
-    font-family: monospace !important;
-  }
-  html.light-theme .light-rf-card .finding-subtitle { color: #475569 !important; }
-  html.light-theme .light-rf-card .finding-id,
-  html.light-theme .light-rf-card .finding-time { color: #94a3b8 !important; }
-
-  html.light-theme .light-rf-card .link-investigate { color: #6366f1 !important; font-weight: 500 !important; }
-  html.light-theme .light-rf-card .link-investigate:hover { color: #4f46e5 !important; text-decoration: underline !important; }
-  html.light-theme .light-rf-card .link-resolve { color: #16a34a !important; font-weight: 500 !important; }
-  html.light-theme .light-rf-card .link-resolve:hover { color: #15803d !important; text-decoration: underline !important; }
-
-  /* Status Badges */
-  html.light-theme .light-badge-open {
-    background: rgba(220, 38, 38, 0.10) !important;
-    border: 1px solid rgba(220, 38, 38, 0.25) !important;
-    color: #dc2626 !important;
-    border-radius: 100px !important;
-    font-size: 11px !important;
-    font-weight: 700 !important;
-    padding: 3px 10px !important;
-    letter-spacing: 0.05em !important;
-  }
-  html.light-theme .light-badge-investigating {
-    background: rgba(234, 88, 12, 0.10) !important;
-    border: 1px solid rgba(234, 88, 12, 0.25) !important;
-    color: #ea580c !important;
-    border-radius: 100px !important;
-    font-size: 11px !important;
-    font-weight: 700 !important;
-    padding: 3px 10px !important;
-  }
-  html.light-theme .light-badge-closed {
-    background: rgba(22, 163, 74, 0.10) !important;
-    border: 1px solid rgba(22, 163, 74, 0.25) !important;
-    color: #16a34a !important;
-    border-radius: 100px !important;
-    font-size: 11px !important;
-    font-weight: 700 !important;
-    padding: 3px 10px !important;
-  }
-
-  /* Inside Card Severity Badges */
-  html.light-theme .light-sev-critical {
-    background: rgba(220, 38, 38, 0.10) !important;
-    border: 1px solid rgba(220, 38, 38, 0.22) !important;
-    color: #dc2626 !important;
-    border-radius: 100px !important;
-  }
-  html.light-theme .light-sev-high {
-    background: rgba(234, 88, 12, 0.10) !important;
-    border: 1px solid rgba(234, 88, 12, 0.22) !important;
-    color: #ea580c !important;
-    border-radius: 100px !important;
-  }
-  html.light-theme .light-sev-medium {
-    background: rgba(202, 138, 4, 0.10) !important;
-    border: 1px solid rgba(202, 138, 4, 0.22) !important;
-    color: #ca8a04 !important;
-    border-radius: 100px !important;
-  }
-  html.light-theme .light-sev-low {
-    background: rgba(22, 163, 74, 0.10) !important;
-    border: 1px solid rgba(22, 163, 74, 0.22) !important;
-    color: #16a34a !important;
-    border-radius: 100px !important;
-  }
-
-  /* -------------------------------------------------------------------------- */
-  /* CloudTrail Page Light Overrides                                            */
-  /* -------------------------------------------------------------------------- */
-  html.light-theme .light-ct-header { color: #0f172a !important; font-weight: 700 !important; }
-  html.light-theme .light-ct-subtext { color: #475569 !important; }
-  
-  html.light-theme .light-ct-live-pill {
-    background: rgba(22, 163, 74, 0.10) !important;
-    border: 1px solid rgba(22, 163, 74, 0.25) !important;
-    color: #16a34a !important;
-    border-radius: 100px !important;
-    font-weight: 600 !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.90) !important;
-  }
-
-  html.light-theme .light-ct-filter {
-    background: rgba(255, 255, 255, 0.58) !important;
-    backdrop-filter: blur(16px) saturate(160%) !important;
-    -webkit-backdrop-filter: blur(16px) saturate(160%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.78) !important;
-    border-radius: 14px !important;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
-  }
-  html.light-theme .light-ct-filter .filter-dropdown { color: #475569 !important; }
-  html.light-theme .light-ct-filter input::placeholder { color: #94a3b8 !important; }
-  html.light-theme .light-ct-filter input { color: #0f172a !important; }
-
-  html.light-theme .light-ct-table-container {
-    background: rgba(255, 255, 255, 0.55) !important;
-    backdrop-filter: blur(18px) saturate(160%) !important;
-    -webkit-backdrop-filter: blur(18px) saturate(160%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.75) !important;
-    border-radius: 16px !important;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
-    overflow: hidden !important;
-  }
-
-  html.light-theme .light-ct-row {
-    border-bottom: 1px solid rgba(203, 213, 225, 0.35) !important;
-  }
-  html.light-theme .light-ct-row:hover {
-    background: rgba(255, 255, 255, 0.55) !important;
-    backdrop-filter: blur(8px) !important;
-    transition: background 150ms ease !important;
-  }
-
-  html.light-theme .light-ct-row .ct-time { color: #94a3b8 !important; font-size: 12px !important; font-variant-numeric: tabular-nums !important; }
-  html.light-theme .light-ct-row .ct-action { color: #0f172a !important; font-weight: 600 !important; }
-  html.light-theme .light-ct-row .ct-arn { color: #0d9488 !important; font-family: monospace !important; font-size: 13px !important; }
-  html.light-theme .light-ct-row .ct-note { color: #94a3b8 !important; font-size: 12px !important; }
-
-  /* Cloud Provider Badges */
-  html.light-theme .light-ct-prov-aws {
-    background: rgba(249, 115, 22, 0.10) !important;
-    border: 1px solid rgba(249, 115, 22, 0.25) !important;
-    color: #ea580c !important;
-    border-radius: 6px !important;
-    font-size: 11px !important;
-    font-weight: 700 !important;
-    padding: 2px 8px !important;
-  }
-  html.light-theme .light-ct-prov-gcp {
-    background: rgba(59, 130, 246, 0.10) !important;
-    border: 1px solid rgba(59, 130, 246, 0.25) !important;
-    color: #2563eb !important;
-    border-radius: 6px !important;
-    font-size: 11px !important;
-    font-weight: 700 !important;
-    padding: 2px 8px !important;
-  }
-  html.light-theme .light-ct-prov-azure {
-    background: rgba(99, 102, 241, 0.10) !important;
-    border: 1px solid rgba(99, 102, 241, 0.25) !important;
-    color: #6366f1 !important;
-    border-radius: 6px !important;
-    font-size: 11px !important;
-    font-weight: 700 !important;
-    padding: 2px 8px !important;
-  }
-  html.light-theme .light-ct-prov-gke {
-    background: rgba(22, 163, 74, 0.10) !important;
-    border: 1px solid rgba(22, 163, 74, 0.25) !important;
-    color: #16a34a !important;
-    border-radius: 6px !important;
-    font-size: 11px !important;
-    font-weight: 700 !important;
-    padding: 2px 8px !important;
-  }
-
-  /* Alert / Threat Badges */
-  html.light-theme .light-ct-alert-anomaly {
-    background: rgba(234, 88, 12, 0.10) !important;
-    border: 1px solid rgba(234, 88, 12, 0.28) !important;
-    color: #ea580c !important;
-    border-radius: 8px !important;
-    font-size: 11px !important;
-    font-weight: 700 !important;
-    padding: 4px 10px !important;
-    letter-spacing: 0.03em !important;
-    white-space: nowrap !important;
-  }
-  html.light-theme .light-ct-alert-priv {
-    background: rgba(220, 38, 38, 0.10) !important;
-    border: 1px solid rgba(220, 38, 38, 0.28) !important;
-    color: #dc2626 !important;
-    border-radius: 8px !important;
-    font-size: 11px !important;
-    font-weight: 700 !important;
-    padding: 4px 10px !important;
-  }
-  html.light-theme .light-ct-alert-auto {
-    background: rgba(99, 102, 241, 0.10) !important;
-    border: 1px solid rgba(99, 102, 241, 0.28) !important;
-    color: #6366f1 !important;
-    border-radius: 8px !important;
-    font-size: 11px !important;
-    font-weight: 700 !important;
-    padding: 4px 10px !important;
-  }
-  html.light-theme .light-ct-alert-auth {
-    background: rgba(220, 38, 38, 0.10) !important;
-    border: 1px solid rgba(220, 38, 38, 0.28) !important;
-    color: #dc2626 !important;
-    border-radius: 8px !important;
-    font-size: 11px !important;
-    font-weight: 700 !important;
-    padding: 4px 10px !important;
-  }
-  html.light-theme .light-ct-alert-warn {
-    background: rgba(202, 138, 4, 0.10) !important;
-    border: 1px solid rgba(202, 138, 4, 0.28) !important;
-    color: #ca8a04 !important;
-    border-radius: 8px !important;
-    font-size: 11px !important;
-    font-weight: 700 !important;
-    padding: 4px 10px !important;
-  }
-  html.light-theme .light-ct-alert-default {
-    background: rgba(99, 102, 241, 0.08) !important;
-    border: 1px solid rgba(99, 102, 241, 0.20) !important;
-    color: #6366f1 !important;
-    border-radius: 8px !important;
-    font-size: 11px !important;
-    font-weight: 700 !important;
-    padding: 4px 10px !important;
-  }
-
-  /* -------------------------------------------------------------------------- */
-  /* Dashboard Layout Fixes (Problem 1-7)                                       */
-  /* -------------------------------------------------------------------------- */
-  
-  /* Problem 2: Liquid Glass Panels */
-  html.light-theme .light-dash-panel {
-    background: rgba(255, 255, 255, 0.58) !important;
-    backdrop-filter: blur(18px) saturate(170%) !important;
-    -webkit-backdrop-filter: blur(18px) saturate(170%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.78) !important;
-    border-radius: 20px !important;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
-  }
-  html.light-theme .light-dash-panel-left {
-    padding: 24px !important;
-  }
-  html.light-theme .light-dash-panel-right {
-    padding: 20px !important;
-  }
-
-  /* Problem 3: Risk Score Badges */
-  html.light-theme .light-score-low {
-    background: rgba(22, 163, 74, 0.10) !important;
-    border: 1px solid rgba(22, 163, 74, 0.25) !important;
-    color: #15803d !important;
-    border-radius: 100px !important;
-    font-size: 12px !important;
-    font-weight: 700 !important;
-    padding: 3px 10px !important;
-  }
-  html.light-theme .light-score-medium {
-    background: rgba(202, 138, 4, 0.10) !important;
-    border: 1px solid rgba(202, 138, 4, 0.25) !important;
-    color: #92400e !important;
-    border-radius: 100px !important;
-    font-size: 12px !important;
-    font-weight: 700 !important;
-    padding: 3px 10px !important;
-  }
-  html.light-theme .light-score-high {
-    background: rgba(234, 88, 12, 0.10) !important;
-    border: 1px solid rgba(234, 88, 12, 0.25) !important;
-    color: #c2410c !important;
-    border-radius: 100px !important;
-    font-size: 12px !important;
-    font-weight: 700 !important;
-    padding: 3px 10px !important;
-  }
-  html.light-theme .light-score-critical {
-    background: rgba(220, 38, 38, 0.10) !important;
-    border: 1px solid rgba(220, 38, 38, 0.25) !important;
-    color: #b91c1c !important;
-    border-radius: 100px !important;
-    font-size: 12px !important;
-    font-weight: 700 !important;
-    padding: 3px 10px !important;
-  }
-
-  /* Problem 4: OPEN badge */
-  html.light-theme .light-badge-open-sm {
-    background: rgba(99, 102, 241, 0.10) !important;
-    border: 1px solid rgba(99, 102, 241, 0.25) !important;
-    color: #6366f1 !important;
-    border-radius: 100px !important;
-    font-size: 11px !important;
-    font-weight: 700 !important;
-    padding: 2px 8px !important;
-  }
-
-  /* Problem 5: Table typography and rows */
-  html.light-theme .light-table-th th {
-    color: #64748b !important;
-    font-size: 11px !important;
-    font-weight: 600 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.07em !important;
-  }
-  html.light-theme .light-table-row {
-    border-bottom: 1px solid rgba(203, 213, 225, 0.35) !important;
-    transition: background 150ms ease !important;
-    cursor: pointer !important;
-  }
-  html.light-theme .light-table-row:hover {
-    background: rgba(99, 102, 241, 0.04) !important;
-  }
-  html.light-theme .light-identity-name {
-    color: #0f172a !important;
-    font-weight: 600 !important;
-    font-size: 14px !important;
-  }
-  html.light-theme .light-identity-region {
-    color: #94a3b8 !important;
-    font-size: 12px !important;
-  }
-  html.light-theme .light-row-num {
-    color: #94a3b8 !important;
-    font-size: 13px !important;
-  }
-  html.light-theme .light-type-text {
-    color: #475569 !important;
-    font-size: 13px !important;
-  }
-
-  /* Problem 6: Live Risk Findings Rows */
-  html.light-theme .light-finding-row {
-    border-bottom: 1px solid rgba(203, 213, 225, 0.30) !important;
-    padding: 12px 0 !important;
-    transition: all 150ms ease !important;
-    border-left: none !important; /* Override standard finding border if any */
-  }
-  html.light-theme .light-finding-row:hover {
-    background: rgba(99, 102, 241, 0.04) !important;
-    border-radius: 10px !important;
-    padding-left: 8px !important;
-    padding-right: 8px !important;
-  }
-  html.light-theme .light-finding-title {
-    color: #0f172a !important;
-    font-size: 13px !important;
-    font-weight: 500 !important;
-    line-height: 1.4 !important;
-  }
-  html.light-theme .light-finding-time {
-    color: #94a3b8 !important;
-    font-size: 12px !important;
-  }
-  html.light-theme .light-finding-sev-tag {
-    background: rgba(22, 163, 74, 0.10) !important;
-    border: 1px solid rgba(22, 163, 74, 0.22) !important;
-    color: #15803d !important;
-    border-radius: 6px !important;
-    font-size: 11px !important;
-    font-weight: 700 !important;
-    padding: 1px 7px !important;
-  }
-  html.light-theme .light-finding-id-tag {
-    color: #0d9488 !important;
-    font-family: monospace !important;
-    font-size: 12px !important;
-    background: rgba(13, 148, 136, 0.08) !important;
-    border-radius: 4px !important;
-    padding: 1px 6px !important;
-  }
-
-  html.light-theme .light-finding-sev-critical {
-    background: rgba(220, 38, 38, 0.10) !important;
-    border: 1px solid rgba(220, 38, 38, 0.22) !important;
-    color: #dc2626 !important;
-    border-radius: 6px !important;
-    font-size: 11px !important;
-    font-weight: 700 !important;
-    padding: 1px 7px !important;
-  }
-  html.light-theme .light-finding-sev-high {
-    background: rgba(234, 88, 12, 0.10) !important;
-    border: 1px solid rgba(234, 88, 12, 0.22) !important;
-    color: #ea580c !important;
-    border-radius: 6px !important;
-    font-size: 11px !important;
-    font-weight: 700 !important;
-    padding: 1px 7px !important;
-  }
-  html.light-theme .light-finding-sev-medium {
-    background: rgba(202, 138, 4, 0.10) !important;
-    border: 1px solid rgba(202, 138, 4, 0.22) !important;
-    color: #ca8a04 !important;
-    border-radius: 6px !important;
-    font-size: 11px !important;
-    font-weight: 700 !important;
-    padding: 1px 7px !important;
-  }
-
-  /* -------------------------------------------------------------------------- */
-  /* Light Theme Animated Background & Keyframes                                  */
-  /* -------------------------------------------------------------------------- */
-  
-  html.light-theme #bg-orbs {
-    display: block !important;
-  }
-  
-  #bg-orbs {
-    display: none; /* hidden in dark mode */
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    overflow: hidden;
-  }
-
-  .orb-1 {
-    position: absolute;
-    width: 600px;
-    height: 600px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(99,102,241,0.25) 0%, transparent 70%);
-    top: -100px;
-    left: -100px;
-    animation: orbFloat1 18s ease-in-out infinite;
-  }
-  
-  .orb-2 {
-    position: absolute;
-    width: 500px;
-    height: 500px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(20,184,166,0.20) 0%, transparent 70%);
-    bottom: -80px;
-    right: -80px;
-    animation: orbFloat2 22s ease-in-out infinite;
-  }
-  
-  .orb-3 {
-    position: absolute;
-    width: 400px;
-    height: 400px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(168,85,247,0.15) 0%, transparent 70%);
-    top: 40%;
-    right: 20%;
-    animation: orbFloat3 26s ease-in-out infinite;
-  }
-
-  @keyframes orbFloat1 {
-    0%   { transform: translate(0px, 0px) scale(1); }
-    33%  { transform: translate(60px, 40px) scale(1.08); }
-    66%  { transform: translate(-30px, 60px) scale(0.95); }
-    100% { transform: translate(0px, 0px) scale(1); }
-  }
-
-  @keyframes orbFloat2 {
-    0%   { transform: translate(0px, 0px) scale(1); }
-    33%  { transform: translate(-50px, -35px) scale(1.06); }
-    66%  { transform: translate(40px, -55px) scale(0.97); }
-    100% { transform: translate(0px, 0px) scale(1); }
-  }
-
-  @keyframes orbFloat3 {
-    0%   { transform: translate(0px, 0px) scale(1); }
-    50%  { transform: translate(-40px, 50px) scale(1.10); }
-    100% { transform: translate(0px, 0px) scale(1); }
-  }
-
+  /* --------------------------------------------------------------------------
+     Animations
+     -------------------------------------------------------------------------- */
   @keyframes livePulse {
     0%, 100% { opacity: 1; transform: scale(1); }
     50%       { opacity: 0.6; transform: scale(1.3); }
   }
-  
+
   .animate-livePulse {
     animation: livePulse 2s ease-in-out infinite;
   }
+}
 
-  /* -------------------------------------------------------------------------- */
-  /* Settings Page Specific Fixes                                               */
-  /* -------------------------------------------------------------------------- */
+/* ============================================================================
+   Light Theme Class Compatibility
+   All existing components use these classes. They now resolve to the
+   enterprise light values directly (no html.light-theme selector needed).
+   ============================================================================ */
 
-  /* Save Changes Button */
-  html.light-theme .light-settings-save-btn {
-    background: #6366f1 !important;
-    color: #ffffff !important;
-    border: none !important;
-    border-radius: 12px !important;
-    font-weight: 600 !important;
-    padding: 10px 20px !important;
-    box-shadow: 0 4px 14px rgba(99,102,241,0.35) !important;
-    transition: all 200ms ease !important;
+@layer components {
+
+  /* --- Sidebar --- */
+  .light-sidebar { /* no-op, sidebar is always light now */ }
+  .light-topnav { /* no-op */ }
+
+  /* --- Dashboard Hero --- */
+  .light-hero {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   }
-  html.light-theme .light-settings-save-btn:hover {
-    background: #4f46e5 !important;
-    box-shadow: 0 6px 20px rgba(99,102,241,0.45) !important;
-    transform: translateY(-1px) !important;
+  .light-hero .hero-heading { color: #0F172A; }
+  .light-hero .hero-subtext { color: #64748B; }
+  .light-hero .quick-actions-label { color: #94A3B8; }
+
+  .light-btn-investigate {
+    background: #4F46E5;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(79, 70, 229, 0.25);
   }
-  
-  /* Light Theme Toggle Button Active */
-  html.light-theme .light-settings-toggle-active {
-    background: #6366f1 !important;
-    color: #ffffff !important;
-    border: 2px solid #6366f1 !important;
-    border-radius: 10px !important;
-    font-weight: 600 !important;
-  }
-  /* Inactive Toggles */
-  html.light-theme .light-settings-toggle-inactive {
-    border: 2px solid transparent !important;
-  }
-  html.light-theme .light-settings-toggle-inactive:hover {
-    background: rgba(99,102,241,0.08) !important;
-    border-color: rgba(99,102,241,0.30) !important;
-    color: #6366f1 !important;
+  .light-btn-investigate:hover {
+    background: #4338CA;
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.35);
   }
 
-  /* Settings Navigation Panel */
-  html.light-theme .light-settings-nav {
-    background: rgba(255,255,255,0.58) !important;
-    backdrop-filter: blur(18px) saturate(170%) !important;
-    -webkit-backdrop-filter: blur(18px) saturate(170%) !important;
-    border: 1px solid rgba(255,255,255,0.78) !important;
-    border-radius: 16px !important;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.95) !important;
-    padding: 16px !important;
+  .light-btn-ask-ai {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    color: #334155;
+    border-radius: 8px;
   }
-  html.light-theme .light-settings-nav-item-active {
-    background: rgba(99,102,241,0.10) !important;
-    border-radius: 10px !important;
-    color: #6366f1 !important;
-    font-weight: 600 !important;
-    border: none !important;
-  }
-  html.light-theme .light-settings-nav-item-inactive:hover {
-    background: rgba(99,102,241,0.06) !important;
-    border-radius: 10px !important;
-    color: #6366f1 !important;
-    border: none !important;
+  .light-btn-ask-ai:hover {
+    background: #F8FAFC;
+    border-color: #4F46E5;
+    color: #4F46E5;
   }
 
-  /* Settings Content Panel */
-  html.light-theme .light-settings-content {
-    background: rgba(255,255,255,0.58) !important;
-    backdrop-filter: blur(18px) saturate(170%) !important;
-    -webkit-backdrop-filter: blur(18px) saturate(170%) !important;
-    border: 1px solid rgba(255,255,255,0.78) !important;
-    border-radius: 16px !important;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.95) !important;
+  .light-btn-quick {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    color: #334155;
+    border-radius: 8px;
+  }
+  .light-btn-quick:hover {
+    background: #F8FAFC;
+    border-color: #C7D2FE;
   }
 
-  /* Settings Input Fields */
-  html.light-theme .light-settings-input {
-    background: rgba(255,255,255,0.70) !important;
-    border: 1px solid rgba(203,213,225,0.70) !important;
-    border-radius: 10px !important;
-    color: #0f172a !important;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.03) !important;
-  }
-  html.light-theme .light-settings-input:focus {
-    border-color: rgba(99,102,241,0.50) !important;
-    box-shadow: 0 0 0 3px rgba(99,102,241,0.10), inset 0 2px 4px rgba(0,0,0,0.03) !important;
-    outline: none !important;
+  .light-stat-pill {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    color: #475569;
+    border-radius: 100px;
   }
 
-  /* -------------------------------------------------------------------------- */
-  /* Premium Liquid Glass UI Redesign (Sidebar & TopNav)                        */
-  /* -------------------------------------------------------------------------- */
-  
-  .glass-premium {
-    background: rgba(255, 255, 255, 0.38) !important;
-    backdrop-filter: blur(28px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.55) !important;
-    box-shadow: 0 30px 70px rgba(30, 41, 59, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+  /* --- Platform Metrics --- */
+  .light-platform-metrics {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   }
-  
-  .dark .glass-premium, html:not(.light-theme) .glass-premium {
-    background: rgba(15, 23, 42, 0.38) !important;
-    backdrop-filter: blur(28px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.15) !important;
-    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  .light-platform-metrics .metrics-label { color: #94A3B8; }
+  .light-platform-metrics .metrics-value,
+  .light-platform-metrics .text-text-primary { color: #0F172A; font-weight: 600; }
+
+  /* --- KPI Cards --- */
+  .light-kpi-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  }
+  .light-kpi-card .kpi-label { color: #64748B; }
+  .light-kpi-card .kpi-value { color: #0F172A; font-weight: 700; }
+  .light-kpi-card .kpi-subtext { color: #475569; }
+
+  .light-badge-monitoring {
+    background: #EFF6FF;
+    color: #2563EB;
+    border: 1px solid #BFDBFE;
+  }
+  .light-badge-healthy {
+    background: #F0FDF4;
+    color: #16A34A;
+    border: 1px solid #BBF7D0;
+  }
+  .light-badge-attention {
+    background: #FFFBEB;
+    color: #D97706;
+    border: 1px solid #FDE68A;
+  }
+  .light-badge-processing {
+    background: #F5F3FF;
+    color: #7C3AED;
+    border: 1px solid #DDD6FE;
+  }
+  .light-kpi-icon { background: #F8FAFC; }
+  .light-kpi-icon svg { color: #4F46E5; }
+
+  /* --- Risk Findings --- */
+  .light-rf-pill {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    color: #0F172A;
+    font-weight: 600;
   }
 
-  .nav-pill-active {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
-    color: #ffffff !important;
-    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3) !important;
+  .light-rf-filter {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   }
-  
-  html:not(.light-theme) .nav-pill-active {
-    background: linear-gradient(135deg, #d3f531 0%, #a3d900 100%) !important;
-    color: #0f172a !important;
-    box-shadow: 0 4px 14px rgba(211, 245, 49, 0.3) !important;
+  .light-rf-filter select,
+  .light-rf-filter .filter-dropdown { color: #475569; }
+  .light-rf-filter select:hover,
+  .light-rf-filter .filter-dropdown:hover { background: #EEF2FF; color: #4F46E5; }
+  .light-rf-filter input { color: #0F172A; }
+  .light-rf-filter input::placeholder { color: #94A3B8; }
+
+  .light-rf-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    transition: box-shadow 200ms ease, border-color 200ms ease;
   }
-  html:not(.light-theme) .nav-pill-active span,
-  html:not(.light-theme) .nav-pill-active svg {
-    color: #0f172a !important;
+  .light-rf-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    border-color: #CBD5E1;
   }
-  html:not(.light-theme) .nav-pill-active .bg-white\/20 {
-    background-color: rgba(15, 23, 42, 0.15) !important;
+
+  .light-rf-card.severity-critical { border-left: 3px solid #DC2626; }
+  .light-rf-card.severity-high { border-left: 3px solid #EA580C; }
+  .light-rf-card.severity-medium { border-left: 3px solid #D97706; }
+  .light-rf-card.severity-low { border-left: 3px solid #16A34A; }
+
+  .light-rf-card .finding-title { color: #0F172A; font-weight: 600; }
+  .light-rf-card .finding-identity {
+    background: #F0FDFA;
+    border: 1px solid #99F6E4;
+    color: #0D9488;
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-family: var(--font-mono), monospace;
   }
-  html:not(.light-theme) .nav-pill-active + .sidebar-active-indicator,
-  html:not(.light-theme) div[layoutId="sidebar-active-indicator"] {
-    background-color: #0f172a !important;
-    box-shadow: 0 0 10px rgba(15, 23, 42, 0.5) !important;
+  .light-rf-card .finding-subtitle { color: #475569; }
+  .light-rf-card .finding-id,
+  .light-rf-card .finding-time { color: #94A3B8; }
+  .light-rf-card .link-investigate { color: #4F46E5; font-weight: 500; }
+  .light-rf-card .link-investigate:hover { color: #4338CA; text-decoration: underline; }
+  .light-rf-card .link-resolve { color: #16A34A; font-weight: 500; }
+  .light-rf-card .link-resolve:hover { color: #15803D; text-decoration: underline; }
+
+  /* Status Badges */
+  .light-badge-open {
+    background: #FEF2F2; border: 1px solid #FECACA; color: #DC2626;
+    border-radius: 100px; font-size: 11px; font-weight: 700; padding: 3px 10px;
   }
-  
-  html:not(.light-theme) .text-blue-500 {
-    color: #d3f531 !important;
+  .light-badge-investigating {
+    background: #FFF7ED; border: 1px solid #FED7AA; color: #EA580C;
+    border-radius: 100px; font-size: 11px; font-weight: 700; padding: 3px 10px;
   }
-  html:not(.light-theme) .text-blue-500\/80 {
-    color: rgba(211, 245, 49, 0.8) !important;
+  .light-badge-closed {
+    background: #F0FDF4; border: 1px solid #BBF7D0; color: #16A34A;
+    border-radius: 100px; font-size: 11px; font-weight: 700; padding: 3px 10px;
   }
-  html:not(.light-theme) .bg-blue-500\/20 {
-    background-color: rgba(211, 245, 49, 0.2) !important;
+
+  /* Severity Badges */
+  .light-sev-critical { background: #FEF2F2; border: 1px solid #FECACA; color: #DC2626; border-radius: 100px; }
+  .light-sev-high { background: #FFF7ED; border: 1px solid #FED7AA; color: #EA580C; border-radius: 100px; }
+  .light-sev-medium { background: #FFFBEB; border: 1px solid #FDE68A; color: #D97706; border-radius: 100px; }
+  .light-sev-low { background: #F0FDF4; border: 1px solid #BBF7D0; color: #16A34A; border-radius: 100px; }
+
+  /* --- CloudTrail --- */
+  .light-ct-header { color: #0F172A; font-weight: 700; }
+  .light-ct-subtext { color: #475569; }
+
+  .light-ct-live-pill {
+    background: #F0FDF4; border: 1px solid #BBF7D0; color: #16A34A;
+    border-radius: 100px; font-weight: 600;
   }
-  html:not(.light-theme) .border-blue-500\/30 {
-    border-color: rgba(211, 245, 49, 0.3) !important;
+
+  .light-ct-filter {
+    background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   }
-  html:not(.light-theme) .border-blue-500\/40 {
-    border-color: rgba(211, 245, 49, 0.4) !important;
+  .light-ct-filter .filter-dropdown { color: #475569; }
+  .light-ct-filter input::placeholder { color: #94A3B8; }
+  .light-ct-filter input { color: #0F172A; }
+
+  .light-ct-table-container {
+    background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
   }
-  html:not(.light-theme) .from-blue-500\/20 {
-    --tw-gradient-from: rgba(211, 245, 49, 0.2) !important;
-    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(211, 245, 49, 0)) !important;
+
+  .light-ct-row { border-bottom: 1px solid #F1F5F9; }
+  .light-ct-row:hover { background: #F8FAFC; }
+  .light-ct-row .ct-time { color: #94A3B8; font-size: 12px; font-variant-numeric: tabular-nums; }
+  .light-ct-row .ct-action { color: #0F172A; font-weight: 600; }
+  .light-ct-row .ct-arn { color: #0D9488; font-family: var(--font-mono), monospace; font-size: 13px; }
+  .light-ct-row .ct-note { color: #94A3B8; font-size: 12px; }
+
+  /* Cloud Provider Badges */
+  .light-ct-prov-aws { background: #FFF7ED; border: 1px solid #FED7AA; color: #EA580C; border-radius: 6px; font-size: 11px; font-weight: 700; padding: 2px 8px; }
+  .light-ct-prov-gcp { background: #EFF6FF; border: 1px solid #BFDBFE; color: #2563EB; border-radius: 6px; font-size: 11px; font-weight: 700; padding: 2px 8px; }
+  .light-ct-prov-azure { background: #EEF2FF; border: 1px solid #C7D2FE; color: #4F46E5; border-radius: 6px; font-size: 11px; font-weight: 700; padding: 2px 8px; }
+  .light-ct-prov-gke { background: #F0FDF4; border: 1px solid #BBF7D0; color: #16A34A; border-radius: 6px; font-size: 11px; font-weight: 700; padding: 2px 8px; }
+
+  /* Alert Badges */
+  .light-ct-alert-anomaly { background: #FFF7ED; border: 1px solid #FED7AA; color: #EA580C; border-radius: 6px; font-size: 11px; font-weight: 700; padding: 4px 10px; }
+  .light-ct-alert-priv { background: #FEF2F2; border: 1px solid #FECACA; color: #DC2626; border-radius: 6px; font-size: 11px; font-weight: 700; padding: 4px 10px; }
+  .light-ct-alert-auto { background: #EEF2FF; border: 1px solid #C7D2FE; color: #4F46E5; border-radius: 6px; font-size: 11px; font-weight: 700; padding: 4px 10px; }
+  .light-ct-alert-auth { background: #FEF2F2; border: 1px solid #FECACA; color: #DC2626; border-radius: 6px; font-size: 11px; font-weight: 700; padding: 4px 10px; }
+  .light-ct-alert-warn { background: #FFFBEB; border: 1px solid #FDE68A; color: #D97706; border-radius: 6px; font-size: 11px; font-weight: 700; padding: 4px 10px; }
+  .light-ct-alert-default { background: #EEF2FF; border: 1px solid #C7D2FE; color: #4F46E5; border-radius: 6px; font-size: 11px; font-weight: 700; padding: 4px 10px; }
+
+  /* --- Dashboard Panels --- */
+  .light-dash-panel {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   }
-  html:not(.light-theme) .to-indigo-500\/10 {
-    --tw-gradient-to: rgba(211, 245, 49, 0.1) !important;
+  .light-dash-panel-left { padding: 24px; }
+  .light-dash-panel-right { padding: 20px; }
+
+  /* Score Badges */
+  .light-score-low { background: #F0FDF4; border: 1px solid #BBF7D0; color: #15803D; border-radius: 100px; font-size: 12px; font-weight: 700; padding: 3px 10px; }
+  .light-score-medium { background: #FFFBEB; border: 1px solid #FDE68A; color: #92400E; border-radius: 100px; font-size: 12px; font-weight: 700; padding: 3px 10px; }
+  .light-score-high { background: #FFF7ED; border: 1px solid #FED7AA; color: #C2410C; border-radius: 100px; font-size: 12px; font-weight: 700; padding: 3px 10px; }
+  .light-score-critical { background: #FEF2F2; border: 1px solid #FECACA; color: #B91C1C; border-radius: 100px; font-size: 12px; font-weight: 700; padding: 3px 10px; }
+
+  .light-badge-open-sm { background: #EEF2FF; border: 1px solid #C7D2FE; color: #4F46E5; border-radius: 100px; font-size: 11px; font-weight: 700; padding: 2px 8px; }
+
+  /* Table */
+  .light-table-th th { color: #64748B; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; }
+  .light-table-row { border-bottom: 1px solid #F1F5F9; transition: background 150ms ease; cursor: pointer; }
+  .light-table-row:hover { background: #F8FAFC; }
+  .light-identity-name { color: #0F172A; font-weight: 600; font-size: 14px; }
+  .light-identity-region { color: #94A3B8; font-size: 12px; }
+  .light-row-num { color: #94A3B8; font-size: 13px; }
+  .light-type-text { color: #475569; font-size: 13px; }
+
+  /* Finding Rows */
+  .light-finding-row { border-bottom: 1px solid #F1F5F9; padding: 12px 0; transition: all 150ms ease; }
+  .light-finding-row:hover { background: #F8FAFC; border-radius: 8px; padding-left: 8px; padding-right: 8px; }
+  .light-finding-title { color: #0F172A; font-size: 13px; font-weight: 500; line-height: 1.4; }
+  .light-finding-time { color: #94A3B8; font-size: 12px; }
+  .light-finding-sev-tag { background: #F0FDF4; border: 1px solid #BBF7D0; color: #15803D; border-radius: 6px; font-size: 11px; font-weight: 700; padding: 1px 7px; }
+  .light-finding-id-tag { color: #0D9488; font-family: var(--font-mono), monospace; font-size: 12px; background: #F0FDFA; border-radius: 4px; padding: 1px 6px; }
+  .light-finding-sev-critical { background: #FEF2F2; border: 1px solid #FECACA; color: #DC2626; border-radius: 6px; font-size: 11px; font-weight: 700; padding: 1px 7px; }
+  .light-finding-sev-high { background: #FFF7ED; border: 1px solid #FED7AA; color: #EA580C; border-radius: 6px; font-size: 11px; font-weight: 700; padding: 1px 7px; }
+  .light-finding-sev-medium { background: #FFFBEB; border: 1px solid #FDE68A; color: #D97706; border-radius: 6px; font-size: 11px; font-weight: 700; padding: 1px 7px; }
+
+  /* --- Settings --- */
+  .light-settings-save-btn {
+    background: #4F46E5; color: #FFFFFF; border: none; border-radius: 8px;
+    font-weight: 600; padding: 10px 20px;
+    box-shadow: 0 1px 3px rgba(79, 70, 229, 0.25);
   }
-  html:not(.light-theme) .hover\:text-blue-600:hover,
-  html:not(.light-theme) .text-blue-600 {
-    color: #d3f531 !important;
+  .light-settings-save-btn:hover {
+    background: #4338CA;
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.35);
   }
-  html:not(.light-theme) .bg-blue-500 {
-    background-color: #d3f531 !important;
+
+  .light-settings-toggle-active {
+    background: #4F46E5; color: #FFFFFF;
+    border: 2px solid #4F46E5; border-radius: 8px; font-weight: 600;
   }
-  html:not(.light-theme) .shadow-\[0_0_8px_rgba\(59\,130\,246\,0\.8\)\] {
-    box-shadow: 0 0 8px rgba(211, 245, 49, 0.8) !important;
+  .light-settings-toggle-inactive { border: 2px solid transparent; }
+  .light-settings-toggle-inactive:hover {
+    background: #EEF2FF; border-color: #C7D2FE; color: #4F46E5;
   }
-  
-  .search-pill:focus-within {
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2), inset 0 2px 4px rgba(0,0,0,0.05) !important;
-    border-color: rgba(59, 130, 246, 0.5) !important;
+
+  .light-settings-nav {
+    background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04); padding: 16px;
+  }
+  .light-settings-nav-item-active {
+    background: #EEF2FF; border-radius: 8px; color: #4F46E5;
+    font-weight: 600; border: none;
+  }
+  .light-settings-nav-item-inactive:hover {
+    background: #F8FAFC; border-radius: 8px; color: #4F46E5; border: none;
+  }
+
+  .light-settings-content {
+    background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  }
+
+  .light-settings-input {
+    background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px;
+    color: #0F172A; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  }
+  .light-settings-input:focus {
+    border-color: #4F46E5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    outline: none;
   }
 }
 
+/* ============================================================================
+   Landing Page Styles
+   ============================================================================ */
+
 @layer components {
-  /* -------------------------------------------------------------------------- */
-  /* Landing Page Dual-Theme Base Classes (Dark Mode Default)                   */
-  /* -------------------------------------------------------------------------- */
-  
+
   .landing-page-wrapper {
-    background-color: #0d1117;
-    background-image:
-      radial-gradient(ellipse 60% 40% at 50% 0%, rgba(180, 200, 80, 0.04) 0%, transparent 50%),
-      radial-gradient(ellipse 70% 50% at 15% 30%, rgba(99,102,241,0.06) 0%, transparent 55%),
-      radial-gradient(ellipse 60% 40% at 85% 70%, rgba(20,184,166,0.05) 0%, transparent 50%);
+    background-color: #F8FAFC;
     min-height: 100vh;
   }
 
   .landing-nav {
-    background: rgba(13, 17, 23, 0.90);
+    background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid #E2E8F0;
   }
-  
+
   .landing-glass {
-    background: #161b22;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
     border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   }
-  
+
   .landing-glass:hover {
-    background: #1c2128;
-    border-color: rgba(255, 255, 255, 0.14);
+    border-color: #CBD5E1;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
   }
 
   .landing-hero-preview {
-    background: #161b22;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 24px; /* keeping larger radius for the preview panel */
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
   }
-  
+
   .landing-stats-bar {
-    background: #161b22;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: #FFFFFF;
+    border-top: 1px solid #E2E8F0;
+    border-bottom: 1px solid #E2E8F0;
   }
 
   .landing-cta {
-    background: #161b22;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: #EEF2FF;
+    border: 1px solid #C7D2FE;
     border-radius: 12px;
   }
 
-  .landing-text-primary { color: #e2e8f0; }
-  .landing-text-secondary { color: #94a3b8; }
-  .landing-text-muted { color: #64748b; }
-  
+  .landing-text-primary { color: #0F172A; }
+  .landing-text-secondary { color: #64748B; }
+  .landing-text-muted { color: #94A3B8; }
+
   .landing-btn-ghost {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.14);
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
     border-radius: 8px;
-    color: #e2e8f0;
+    color: #334155;
   }
   .landing-btn-ghost:hover {
-    background: rgba(255,255,255,0.08);
-    border-color: rgba(255,255,255,0.25);
-  }
-
-  /* -------------------------------------------------------------------------- */
-  /* Landing Page Dual-Theme Light Overrides                                    */
-  /* -------------------------------------------------------------------------- */
-  
-  html.light-theme .landing-nav {
-    background: rgba(240,244,248,0.80) !important;
-    backdrop-filter: blur(24px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
-    border-bottom: 1px solid rgba(255,255,255,0.70) !important;
-    box-shadow: 0 1px 12px rgba(0,0,0,0.05) !important;
-  }
-  
-  html.light-theme .landing-glass {
-    background: rgba(255,255,255,0.55) !important;
-    backdrop-filter: blur(18px) saturate(170%) !important;
-    -webkit-backdrop-filter: blur(18px) saturate(170%) !important;
-    border: 1px solid rgba(255,255,255,0.78) !important;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.95) !important;
-  }
-  
-  html.light-theme .landing-glass:hover {
-    box-shadow: 0 12px 40px rgba(99,102,241,0.15), inset 0 1px 0 rgba(255,255,255,0.95) !important;
-  }
-
-  html.light-theme .landing-hero-preview {
-    background: rgba(255,255,255,0.45) !important;
-    backdrop-filter: blur(24px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.80) !important;
-    box-shadow: 0 24px 80px rgba(99,102,241,0.15), 0 8px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.95) !important;
-  }
-  
-  html.light-theme .landing-stats-bar {
-    background: rgba(255,255,255,0.50) !important;
-    border-top: 1px solid rgba(255, 255, 255, 0.70) !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.70) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.95) !important;
-  }
-
-  html.light-theme .landing-cta {
-    background: rgba(99,102,241,0.08) !important;
-    border: 1px solid rgba(99,102,241,0.20) !important;
-    box-shadow: 0 8px 40px rgba(99,102,241,0.12), inset 0 1px 0 rgba(255,255,255,0.90) !important;
-  }
-
-  html.light-theme .landing-text-primary { color: #0f172a !important; }
-  html.light-theme .landing-text-secondary { color: #475569 !important; }
-  
-  html.light-theme .landing-btn-ghost {
-    background: rgba(255,255,255,0.60) !important;
-    border: 1px solid rgba(255,255,255,0.80) !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.95) !important;
-    color: #0f172a !important;
-  }
-  html.light-theme .landing-btn-ghost:hover {
-    background: rgba(255,255,255,0.80) !important;
+    background: #F8FAFC;
+    border-color: #CBD5E1;
   }
 }
+
+/* ============================================================================
+   Utility: Hide bg-orbs (no longer needed)
+   ============================================================================ */
+#bg-orbs { display: none; }

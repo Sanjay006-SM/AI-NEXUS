@@ -11,14 +11,14 @@ class RiskFactorCalculator:
         self.db = db
         self.graph = graph
 
-    def calc_privilege_escalation(self, arn: str) -> Tuple[int, List[str]]:
+    def calc_privilege_escalation(self, identity: MachineIdentity) -> Tuple[int, List[str]]:
         score = 0
         reasons = []
         query = """
-        MATCH (i:Identity {arn: $arn})-[rel:ASSUMED_ROLE]->(target)
+        MATCH (i:Identity {arn: $arn, workspace_id: $workspace_id})-[rel:ASSUMED_ROLE]->(target {workspace_id: $workspace_id})
         RETURN count(target) as role_count
         """
-        result = self.graph.run(query, arn=arn).single()
+        result = self.graph.run(query, arn=identity.arn, workspace_id=str(identity.workspace_id)).single()
         role_count = result["role_count"] if result else 0
         
         if role_count > 0:
@@ -27,14 +27,15 @@ class RiskFactorCalculator:
             
         return score, reasons
 
-    def calc_sensitive_access(self, arn: str) -> Tuple[int, List[str]]:
+    def calc_sensitive_access(self, identity: MachineIdentity) -> Tuple[int, List[str]]:
         score = 0
         reasons = []
         
         sensitive_services = ['kms.amazonaws.com', 'iam.amazonaws.com', 'secretsmanager.amazonaws.com']
         
         counts = self.db.query(AccessLog.event_source, func.count(AccessLog.id))\
-            .filter(AccessLog.identity_arn == arn)\
+            .filter(AccessLog.identity_arn == identity.arn)\
+            .filter(AccessLog.workspace_id == identity.workspace_id)\
             .filter(AccessLog.event_source.in_(sensitive_services))\
             .group_by(AccessLog.event_source).all()
             
@@ -43,7 +44,8 @@ class RiskFactorCalculator:
             reasons.append(f"Accessed sensitive service {service} ({count} times).")
             
         s3_counts = self.db.query(func.count(AccessLog.id))\
-            .filter(AccessLog.identity_arn == arn)\
+            .filter(AccessLog.identity_arn == identity.arn)\
+            .filter(AccessLog.workspace_id == identity.workspace_id)\
             .filter(AccessLog.event_source == 's3.amazonaws.com')\
             .filter(AccessLog.event_name.in_(['DeleteBucket', 'DeleteObject', 'PutBucketAcl', 'PutBucketPolicy']))\
             .scalar()
@@ -62,14 +64,14 @@ class RiskFactorCalculator:
             reasons.append(f"High API activity volume ({identity.total_events} total events).")
         return score, reasons
 
-    def calc_geographic_anomaly(self, arn: str) -> Tuple[int, List[str]]:
+    def calc_geographic_anomaly(self, identity: MachineIdentity) -> Tuple[int, List[str]]:
         score = 0
         reasons = []
         query = """
-        MATCH (i:Identity {arn: $arn})-[rel:ORIGINATED_FROM]->(ip:IPAddress)
+        MATCH (i:Identity {arn: $arn, workspace_id: $workspace_id})-[rel:ORIGINATED_FROM]->(ip:IPAddress {workspace_id: $workspace_id})
         RETURN count(ip) as ip_count
         """
-        result = self.graph.run(query, arn=arn).single()
+        result = self.graph.run(query, arn=identity.arn, workspace_id=str(identity.workspace_id)).single()
         ip_count = result["ip_count"] if result else 0
         
         if ip_count > 5:
@@ -89,12 +91,13 @@ class RiskFactorCalculator:
                 reasons.append(f"Identity active after long period of low average activity.")
         return score, reasons
 
-    def calc_failed_calls(self, arn: str) -> Tuple[int, List[str]]:
+    def calc_failed_calls(self, identity: MachineIdentity) -> Tuple[int, List[str]]:
         score = 0
         reasons = []
         
         failed_count = self.db.query(func.count(AccessLog.id))\
-            .filter(AccessLog.identity_arn == arn)\
+            .filter(AccessLog.identity_arn == identity.arn)\
+            .filter(AccessLog.workspace_id == identity.workspace_id)\
             .filter(AccessLog.raw_event_json.op('->>')('errorCode').in_(['AccessDenied', 'UnauthorizedOperation']))\
             .scalar()
             

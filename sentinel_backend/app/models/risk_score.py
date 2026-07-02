@@ -11,6 +11,7 @@ class RiskScore(Base):
     __tablename__ = "risk_scores"
     
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    workspace_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("workspaces.id", ondelete="CASCADE"), index=True, nullable=False)
     identity_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("machine_identities.id", ondelete="CASCADE"), index=True)
     score: Mapped[int] = mapped_column(Integer)
     severity: Mapped[str] = mapped_column(String(50), index=True)

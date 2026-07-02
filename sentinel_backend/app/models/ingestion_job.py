@@ -8,7 +8,7 @@ class IngestionJob(Base):
     __tablename__ = "ingestion_jobs"
     
     job_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    tenant_id = Column(UUID(as_uuid=True), nullable=True)
+    workspace_id = Column(UUID(as_uuid=True), ForeignKey("workspaces.id", ondelete="CASCADE"), nullable=False, index=True)
     s3_bucket_name = Column(String(255), nullable=False)
     status = Column(String(50), nullable=False)
     events_processed = Column(BigInteger, default=0)

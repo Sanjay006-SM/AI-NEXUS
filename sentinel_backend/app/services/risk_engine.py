@@ -30,12 +30,12 @@ class RiskEngine:
         all_reasons = []
         
         # 1. Privilege Escalation (Graph-based)
-        score, reasons = self.calculator.calc_privilege_escalation(identity.arn)
+        score, reasons = self.calculator.calc_privilege_escalation(identity)
         total_score += score
         all_reasons.extend(reasons)
         
         # 2. Sensitive Resource Access (SQL-based)
-        score, reasons = self.calculator.calc_sensitive_access(identity.arn)
+        score, reasons = self.calculator.calc_sensitive_access(identity)
         total_score += score
         all_reasons.extend(reasons)
         
@@ -45,7 +45,7 @@ class RiskEngine:
         all_reasons.extend(reasons)
         
         # 4. Geographic Anomaly (Graph-based)
-        score, reasons = self.calculator.calc_geographic_anomaly(identity.arn)
+        score, reasons = self.calculator.calc_geographic_anomaly(identity)
         total_score += score
         all_reasons.extend(reasons)
         
@@ -55,7 +55,7 @@ class RiskEngine:
         all_reasons.extend(reasons)
         
         # 6. Failed API Calls (SQL JSONB-based)
-        score, reasons = self.calculator.calc_failed_calls(identity.arn)
+        score, reasons = self.calculator.calc_failed_calls(identity)
         total_score += score
         all_reasons.extend(reasons)
         
@@ -66,12 +66,13 @@ class RiskEngine:
         severity = self.calculate_severity(total_score)
         
         # Clear existing score and findings to ensure 1:1 mapping if not using history tracking
-        self.db.query(RiskScore).filter(RiskScore.identity_id == identity.id).delete()
-        self.db.query(RiskFinding).filter(RiskFinding.identity_id == identity.id).delete()
+        self.db.query(RiskScore).filter(RiskScore.identity_id == identity.id, RiskScore.workspace_id == identity.workspace_id).delete()
+        self.db.query(RiskFinding).filter(RiskFinding.identity_id == identity.id, RiskFinding.workspace_id == identity.workspace_id).delete()
         
         # Insert Risk Findings
         for reason in all_reasons:
             finding = RiskFinding(
+                workspace_id=identity.workspace_id,
                 identity_id=identity.id,
                 finding_type="Risk Analytics",
                 severity=severity,
@@ -81,6 +82,7 @@ class RiskEngine:
         
         # Create new Risk Score record
         risk_record = RiskScore(
+            workspace_id=identity.workspace_id,
             identity_id=identity.id,
             score=total_score,
             severity=severity,
@@ -101,3 +103,19 @@ class RiskEngine:
             self.evaluate_identity(ident)
         self.db.commit()
         logger.info("Global risk evaluation complete.")
+
+    def evaluate_new_identities(self, identity_arns: list, workspace_id: str) -> int:
+        """
+        Evaluates risk scores and findings ONLY for newly active identities.
+        Returns the total number of risk findings generated.
+        """
+        logger.info(f"Evaluating risk for {len(identity_arns)} identities in workspace {workspace_id}...")
+        findings_count = 0
+        for arn in identity_arns:
+            ident = self.db.query(MachineIdentity).filter(MachineIdentity.arn == arn, MachineIdentity.workspace_id == workspace_id).first()
+            if ident:
+                risk_record = self.evaluate_identity(ident)
+                findings_count += len(risk_record.reasons)
+        self.db.commit()
+        logger.info(f"Incremental risk evaluation complete. Findings created: {findings_count}")
+        return findings_count

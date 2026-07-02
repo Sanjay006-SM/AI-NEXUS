@@ -2,8 +2,8 @@ import os
 import json
 import logging
 from typing import Dict, Any
-import google.generativeai as genai
-from google.api_core.exceptions import GoogleAPIError
+from google import genai
+from google.genai import types
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
 from app.core.config import settings
@@ -15,25 +15,26 @@ class AIAnalystService:
         api_key = settings.GEMINI_API_KEY or os.getenv("GEMINI_API_KEY")
         if not api_key:
             logger.error("GEMINI_API_KEY environment variable is missing.")
-        genai.configure(api_key=api_key)
-        # Use gemini-2.5-flash as requested
-        self.model = genai.GenerativeModel("gemini-2.5-flash")
+        
+        self.client = genai.Client(api_key=api_key)
 
     @retry(
         reraise=True,
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=2, max=10),
-        retry=retry_if_exception_type(GoogleAPIError),
+        retry=retry_if_exception_type(Exception),
         before_sleep=lambda retry_state: logger.warning(
             f"Gemini API call failed. Retrying (attempt {retry_state.attempt_number})..."
         )
     )
     def _call_gemini_api(self, prompt: str) -> str:
-        # 30-second timeout handling via request_options
-        response = self.model.generate_content(
-            prompt,
-            generation_config={"response_mime_type": "application/json"},
-            request_options={"timeout": 30.0}
+        # Note: the new SDK config format
+        response = self.client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json"
+            )
         )
         return response.text
 
@@ -61,19 +62,5 @@ class AIAnalystService:
             
         except Exception as e:
             logger.error(f"Error in AIAnalystService: {e}", exc_info=True)
-            # Fallback for Hackathon Demo so the UI doesn't break when API Key is missing or invalid
-            return {
-                "executive_summary": "Simulated AI Analysis due to missing or invalid Gemini API key.",
-                "risk_assessment": "The identity exhibits anomalous behavior consistent with privilege escalation.",
-                "attack_path_analysis": "Path originates from compromised credentials leading to sensitive S3 buckets.",
-                "findings": [
-                    "Unauthorized attempts to assume high-privileged roles.",
-                    "Anomalous access pattern outside business hours."
-                ],
-                "recommendations": [
-                    "Rotate long-lived access key immediately. Key is old with no rotation policy.",
-                    "Down-scope cluster-admin RBAC binding to least-privilege.",
-                    "Pin OIDC subject claim to specific branch to prevent wildcard abuse."
-                ]
-            }
+            raise ValueError(f"AI Analysis Failed: {str(e)}")
 

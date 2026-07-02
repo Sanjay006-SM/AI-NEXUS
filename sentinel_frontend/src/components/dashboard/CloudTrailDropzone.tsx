@@ -15,12 +15,7 @@ export default function CloudTrailDropzone() {
   
   const logs = recentEvents || [];
 
-  const handleDrop = useCallback(async (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const file = e.dataTransfer.files[0];
-    if (!file) return;
-
+  const handleFile = useCallback(async (file: File) => {
     setUploading(true);
     setStatus('idle');
     try {
@@ -35,6 +30,15 @@ export default function CloudTrailDropzone() {
       setUploading(false);
     }
   }, [uploadFile, setUploading]);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      handleFile(file);
+    }
+  }, [handleFile]);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -75,11 +79,7 @@ export default function CloudTrailDropzone() {
               onChange={(e) => {
                 const file = e.target.files?.[0];
                 if (file) {
-                  const mockEvent = {
-                    preventDefault: () => {},
-                    dataTransfer: { files: [file] }
-                  } as unknown as React.DragEvent;
-                  handleDrop(mockEvent);
+                  handleFile(file);
                 }
               }}
             />

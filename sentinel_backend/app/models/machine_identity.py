@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Optional
 import uuid
-from sqlalchemy import String, DateTime, BigInteger, CheckConstraint
+from sqlalchemy import String, DateTime, BigInteger, CheckConstraint, ForeignKey, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
@@ -11,7 +11,8 @@ class MachineIdentity(Base):
     __tablename__ = "machine_identities"
     
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    arn: Mapped[str] = mapped_column(String(512), unique=True, index=True)
+    workspace_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("workspaces.id", ondelete="CASCADE"), index=True, nullable=False)
+    arn: Mapped[str] = mapped_column(String(512), index=True)
     identity_type: Mapped[str] = mapped_column(String(50))
     account_id: Mapped[str] = mapped_column(String(12), index=True)
     first_seen: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
@@ -24,4 +25,5 @@ class MachineIdentity(Base):
     
     __table_args__ = (
         CheckConstraint(identity_type.in_(['AssumedRole', 'AWSService', 'IAMUser']), name='identity_type_check'),
+        UniqueConstraint('arn', 'workspace_id', name='uq_arn_workspace'),
     )

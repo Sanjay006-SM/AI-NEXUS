@@ -20,6 +20,8 @@ class Neo4jSessionManager:
     def get_session(self):
         if self._driver is None:
             self.connect()
+        if hasattr(settings, "NEO4J_DATABASE") and settings.NEO4J_DATABASE:
+            return self._driver.session(database=settings.NEO4J_DATABASE)
         return self._driver.session()
 
 neo4j_manager = Neo4jSessionManager()

@@ -74,6 +74,37 @@ export const useAiInvestigate = () => {
   });
 };
 
+export const useAnalytics = () => {
+  return useQuery({
+    queryKey: ['analyticsDashboard'],
+    queryFn: async (): Promise<any> => {
+      const res = await api.get('/analytics/dashboard');
+      return res;
+    }
+  });
+};
+
+export const useNotifications = () => {
+  return useQuery({
+    queryKey: ['notifications'],
+    queryFn: async (): Promise<any[]> => {
+      const res = await api.get('/notifications');
+      return res;
+    },
+    refetchInterval: 10000 // Poll every 10s
+  });
+};
+
+export const useOrganization = () => {
+  return useQuery({
+    queryKey: ['organization'],
+    queryFn: async (): Promise<any> => {
+      const res = await api.get('/organizations/me');
+      return res;
+    }
+  });
+};
+
 export const useUploadCloudTrail = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -90,6 +121,57 @@ export const useUploadCloudTrail = () => {
       queryClient.invalidateQueries({ queryKey: ['recentFindings'] });
       queryClient.invalidateQueries({ queryKey: ['recentEvents'] });
       queryClient.invalidateQueries({ queryKey: ['topAttackPaths'] });
+      queryClient.invalidateQueries({ queryKey: ['analyticsDashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    }
+  });
+};
+
+export const useAuditLogs = (skip: number = 0, limit: number = 100) => {
+  return useQuery({
+    queryKey: ['auditLogs', skip, limit],
+    queryFn: async (): Promise<{data: any[]}> => {
+      return await api.get(`/audit-logs?skip=${skip}&limit=${limit}`);
+    }
+  });
+};
+
+export const useAuditStatistics = () => {
+  return useQuery({
+    queryKey: ['auditStatistics'],
+    queryFn: async (): Promise<any> => {
+      return await api.get('/audit-logs/statistics');
+    }
+  });
+};
+
+export const useReports = (skip: number = 0, limit: number = 100) => {
+  return useQuery({
+    queryKey: ['reports', skip, limit],
+    queryFn: async (): Promise<{data: any[]}> => {
+      return await api.get(`/reports?skip=${skip}&limit=${limit}`);
+    }
+  });
+};
+
+export const useReportStatistics = () => {
+  return useQuery({
+    queryKey: ['reportStatistics'],
+    queryFn: async (): Promise<any> => {
+      return await api.get('/reports/statistics');
+    }
+  });
+};
+
+export const useGenerateReport = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (req: {name: string, report_type: string, filters: Record<string, any>}): Promise<any> => {
+      return await api.post('/reports/generate', req);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reports'] });
+      queryClient.invalidateQueries({ queryKey: ['reportStatistics'] });
     }
   });
 };

@@ -8,8 +8,8 @@ const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" }
 const plusJakarta = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-jakarta" });
 
 export const metadata: Metadata = {
-  title: "SentinelAI",
-  description: "Cloud Identity Security Platform",
+  title: "SentinelAI — Enterprise Cloud Identity Security",
+  description: "AI-native cloud identity security platform. Monitor machine identities, detect attack paths, and investigate threats with AI.",
 };
 
 export default function RootLayout({
@@ -18,24 +18,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="light-theme">
       <body className={`${inter.variable} ${jetbrains.variable} ${plusJakarta.variable} font-sans text-text-primary min-h-screen antialiased`}>
-        {/* Liquid Glass SVG distortion filter */}
-        <svg style={{position:'absolute',width:0,height:0,overflow:'hidden'}} aria-hidden="true">
-          <defs>
-            <filter id="liquid-glass-filter" x="-20%" y="-20%" width="140%" height="140%" colorInterpolationFilters="sRGB">
-              <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves={3} stitchTiles="stitch" result="noise"/>
-              <feDisplacementMap in="SourceGraphic" in2="noise" scale={3} xChannelSelector="R" yChannelSelector="G"/>
-            </filter>
-          </defs>
-        </svg>
-
-        <div id="bg-orbs">
-          <div className="orb-1"></div>
-          <div className="orb-2"></div>
-          <div className="orb-3"></div>
-        </div>
-
         <Providers>
           {children}
         </Providers>

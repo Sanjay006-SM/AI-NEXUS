@@ -1,110 +1,88 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion } from "framer-motion";
-import {
-  LayoutDashboard,
-  Users,
-  GitBranch,
-  ShieldAlert,
-  FileJson,
-  BrainCircuit,
-  ChartColumn,
-  FileBarChart,
-  Settings,
-  ShieldCheck
+import Link from "next/link";
+import { 
+  LayoutDashboard, 
+  Users, 
+  GitBranch, 
+  ShieldAlert, 
+  Terminal, 
+  BrainCircuit, 
+  FileBarChart, 
+  Settings, 
+  ShieldCheck,
+  ClipboardCheck,
+  Building2,
+  ScrollText,
+  Cloud
 } from "lucide-react";
-
-const MotionLink = motion.create(Link);
+import { useOrganization } from "@/lib/queries";
 
 const navItems = [
-  { name: "Dashboard", href: "/", icon: LayoutDashboard },
-  { name: "Identities", href: "/identities", icon: Users },
-  { name: "Attack Graph", href: "/attack-graph", icon: GitBranch },
-  { name: "Risk Findings", href: "/risk-findings", icon: ShieldAlert },
-  { name: "CloudTrail", href: "/cloudtrail", icon: FileJson },
-  { name: "AI Analyst", href: "/ai-investigation", icon: BrainCircuit },
-  { name: "Analytics", href: "/analytics", icon: ChartColumn },
+  { name: "Executive Overview", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Identity Center", href: "/identities", icon: Users },
+  { name: "Investigations", href: "/attack-graph", icon: GitBranch },
+  { name: "Risk Center", href: "/risk-findings", icon: ShieldAlert },
+  { name: "Cloud Accounts", href: "/integrations", icon: Cloud },
+  { name: "Data Sources", href: "/cloudtrail", icon: Terminal },
+  { name: "SentinelAI Copilot", href: "/ai-investigation", icon: BrainCircuit },
+
+  { name: "Organization", href: "/organization", icon: Building2 },
+  { name: "Audit Logs", href: "/audit-logs", icon: ScrollText },
   { name: "Reports", href: "/reports", icon: FileBarChart },
   { name: "Settings", href: "/settings", icon: Settings },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const prefersReducedMotion = typeof window !== 'undefined' ? window.matchMedia('(prefers-reduced-motion: reduce)').matches : false;
-
-  const sidebarVariants = {
-    hidden: { x: -20, opacity: 0 },
-    visible: { 
-      x: 0, 
-      opacity: 1,
-      transition: { duration: prefersReducedMotion ? 0 : 0.4, ease: "easeOut" as const }
-    }
-  };
+  const { data: orgData } = useOrganization();
+  const orgName = orgData?.name || "Loading Workspace...";
 
   return (
-    <motion.aside 
-      initial="hidden"
-      animate="visible"
-      variants={sidebarVariants}
-      className="w-[310px] shrink-0 h-[calc(100vh-48px)] sticky top-6 flex flex-col z-50 glass-premium rounded-[28px] overflow-hidden"
-    >
+    <aside className="w-[280px] shrink-0 h-[calc(100vh-48px)] sticky top-6 flex flex-col z-50 bg-white border border-slate-200 rounded-[24px] overflow-hidden shadow-sm">
       {/* Premium Logo Area */}
-      <div className="h-24 flex items-center px-6 shrink-0 border-b border-glass-subtle/50 relative overflow-hidden">
-        {/* Subtle glow behind logo */}
-        <div className="absolute top-1/2 left-8 -translate-y-1/2 w-12 h-12 bg-blue-500/20 blur-xl rounded-full" />
-        
-        <Link href="/" className="flex items-center gap-4 relative z-10 w-full hover:opacity-90 transition-opacity">
-          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-blue-500/20 to-indigo-500/10 flex items-center justify-center border border-blue-500/30 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)]">
-            <ShieldCheck className="w-6 h-6 text-blue-500" />
+      <div className="h-20 flex items-center px-6 shrink-0 border-b border-slate-100 relative">
+        <Link href="/" className="flex items-center gap-2.5 w-full">
+          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
+            <ShieldCheck className="w-4.5 h-4.5 text-white" />
           </div>
-          <div className="flex flex-col">
-            <span className="font-extrabold text-xl tracking-tight text-text-primary drop-shadow-sm leading-tight">
-              SentinelAI
-            </span>
-            <span className="text-[11px] font-semibold tracking-wider uppercase text-blue-500/80">
-              Security Operations
-            </span>
-          </div>
+          <span className="font-[family-name:var(--font-jakarta)] text-slate-900 font-bold text-lg">
+            SentinelAI
+          </span>
         </Link>
       </div>
 
-      <div className="flex-1 overflow-y-auto py-6 px-4 flex flex-col gap-2.5 custom-scrollbar">
+      {/* Nav List */}
+      <nav className="flex-1 overflow-y-auto p-4 flex flex-col gap-1.5 scrollbar-none">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
 
           return (
-            <MotionLink
+            <Link
               key={item.name}
               href={item.href}
-              whileHover={{ y: prefersReducedMotion ? 0 : -2, scale: prefersReducedMotion ? 1 : 1.02 }}
-              transition={{ duration: prefersReducedMotion ? 0 : 0.2, ease: "easeOut" }}
-              className={`relative flex items-center gap-4 px-4 py-3 rounded-[20px] text-sm font-semibold transition-all duration-300 ${
-                isActive
-                  ? "nav-pill-active"
-                  : "text-text-muted hover:bg-white/40 hover:shadow-sm"
+              className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                isActive 
+                  ? "bg-indigo-50 text-indigo-700 border border-indigo-100" 
+                  : "text-slate-500 border border-transparent hover:bg-slate-50 hover:text-slate-900"
               }`}
             >
-              {isActive && (
-                <motion.div
-                  layoutId="sidebar-active-indicator"
-                  className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-10 bg-white rounded-r-full shadow-[0_0_10px_rgba(255,255,255,0.5)]"
-                  initial={false}
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                />
-              )}
-              
-              <div className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors ${isActive ? 'bg-white/20 text-white shadow-inner' : 'bg-glass-subtle text-text-muted shadow-sm'}`}>
-                 <Icon className={`w-4.5 h-4.5 ${isActive ? 'text-white' : ''}`} />
-              </div>
-              
-              <span className={`tracking-wide ${isActive ? 'text-white' : ''}`}>{item.name}</span>
-            </MotionLink>
+              <Icon className="w-4 h-4" />
+              {item.name}
+            </Link>
           );
         })}
+      </nav>
+
+      {/* Sidebar Footer */}
+      <div className="p-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between">
+        <div className="flex flex-col">
+          <span className="text-[10px] text-slate-400 font-bold uppercase">Workspace</span>
+          <span className="text-xs font-bold text-slate-800">{orgName}</span>
+        </div>
       </div>
-    </motion.aside>
+    </aside>
   );
 }

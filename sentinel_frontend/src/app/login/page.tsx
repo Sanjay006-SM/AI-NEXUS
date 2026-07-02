@@ -4,17 +4,36 @@ import { motion } from "framer-motion";
 import { Shield, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import api from "@/lib/api";
+import { useGlobalStore } from "@/lib/store";
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const setCurrentWorkspaceId = useGlobalStore((state) => state.setCurrentWorkspaceId);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate auth delay
-    setTimeout(() => {
-      window.location.href = "/dashboard";
-    }, 1500);
+    setError("");
+    try {
+      // Fast API expects standard json body in our implementation
+      const res = await api.post('/auth/login', { email, password });
+      if (res.access_token) {
+        localStorage.setItem('auth-storage', JSON.stringify({ state: { token: res.access_token } }));
+        // Fetch workspace
+        const me = await api.get('/auth/me');
+        if (me.workspace && me.workspace.id) {
+          setCurrentWorkspaceId(me.workspace.id);
+        }
+        window.location.href = "/dashboard";
+      }
+    } catch (err: any) {
+      setError(err.message || "Invalid credentials");
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -52,18 +71,21 @@ export default function LoginPage() {
             Welcome back
           </h1>
           <p className="landing-text-secondary text-sm">
-            Sign in to your SentryIQ command center.
+            Sign in to your SentinelAI command center.
           </p>
         </div>
 
         {/* Auth Form */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 mb-6">
+          {error && <div className="text-red-500 text-sm font-semibold">{error}</div>}
           <div className="flex flex-col gap-1.5">
             <label className="landing-text-primary text-sm font-semibold ml-1">Email</label>
             <input 
               type="email" 
               required
               placeholder="name@company.com" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="input-field h-11"
             />
           </div>
@@ -78,6 +100,8 @@ export default function LoginPage() {
               type="password" 
               required
               placeholder="••••••••" 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="input-field h-11"
             />
           </div>

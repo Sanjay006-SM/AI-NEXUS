@@ -90,16 +90,9 @@ export default function DashboardHero() {
 
   const handleGenerateExport = () => {
     setExportState('generating');
+    setExportState('generating');
     setTimeout(() => {
-      // Create a dummy file and trigger download
-      const blob = new Blob(["Dummy report content"], { type: "text/plain" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      const date = new Date().toISOString().split('T')[0];
-      a.download = `sentryiq-report-${date}.${exportFormat}`;
-      a.click();
-      URL.revokeObjectURL(url);
+      // TODO: Connect to backend export API
       
       setExportState('idle');
       setIsExportModalOpen(false);
@@ -149,26 +142,16 @@ export default function DashboardHero() {
                 className="btn h-11 px-6 flex items-center gap-2 transition-colors bg-glass-subtle border border-glass-active text-text-primary hover:bg-white/10 hover:border-[#D3F531]/50 light-btn-ask-ai"
               >
                 <BrainCircuit className="w-4 h-4 text-[#D3F531]" />
-                Ask SentryIQ AI
+                Ask SentinelAI Copilot
               </button>
             </motion.div>
 
             {/* Live Telemetry Strip */}
             <motion.div variants={itemVariants} className="flex flex-wrap items-center gap-3">
-              {[
-                "38s MTTD",
-                "1,284 paths mapped",
-                "612 auto-remediated",
-                "12.4k events/min"
-              ].map((stat, idx) => (
-                <div 
-                  key={idx} 
-                  className="bg-glass-subtle border border-glass-subtle px-3 py-1.5 rounded text-xs font-mono text-text-primary flex items-center gap-2 light-stat-pill"
-                >
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#D3F531] animate-pulse shadow-[0_0_8px_rgba(211,245,49,0.8)]"></div>
-                  {stat}
-                </div>
-              ))}
+              <div className="bg-glass-subtle border border-glass-subtle px-3 py-1.5 rounded text-xs font-mono text-text-primary flex items-center gap-2 light-stat-pill">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#D3F531] animate-pulse shadow-[0_0_8px_rgba(211,245,49,0.8)]"></div>
+                Live Engine Connected
+              </div>
             </motion.div>
           </div>
 
@@ -193,7 +176,7 @@ export default function DashboardHero() {
               className="btn bg-glass-subtle border border-glass-subtle hover:border-[#6366f1]/50 w-full justify-start gap-3 h-11 px-4 text-text-primary transition-all light-btn-quick"
             >
               <Play className="w-4 h-4 text-[#6366f1]" />
-              Run AI Investigation
+              Run SentinelAI Copilot
             </motion.button>
             
             <motion.button 
@@ -203,7 +186,7 @@ export default function DashboardHero() {
               className="btn bg-glass-subtle border border-glass-subtle hover:border-[#6366f1]/50 w-full justify-start gap-3 h-11 px-4 text-text-primary transition-all light-btn-quick"
             >
               <GitBranch className="w-4 h-4 text-[#f97316]" />
-              Open Attack Graph
+              Open Investigations
             </motion.button>
             
             <motion.button 

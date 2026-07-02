@@ -11,6 +11,7 @@ class RiskFinding(Base):
     __tablename__ = "risk_findings"
     
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    workspace_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("workspaces.id", ondelete="CASCADE"), index=True, nullable=False)
     identity_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("machine_identities.id", ondelete="CASCADE"), index=True)
     finding_type: Mapped[str] = mapped_column(String(100), index=True)
     severity: Mapped[str] = mapped_column(String(50), index=True)

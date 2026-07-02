@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any, Dict, Optional
 import uuid
-from sqlalchemy import String, DateTime, Index
+from sqlalchemy import String, DateTime, Index, ForeignKey, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
@@ -11,7 +11,8 @@ class AccessLog(Base):
     __tablename__ = "access_logs"
     
     id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    event_id: Mapped[str] = mapped_column(String(255), unique=True, index=True)
+    workspace_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("workspaces.id", ondelete="CASCADE"), index=True, nullable=False)
+    event_id: Mapped[str] = mapped_column(String(255), index=True)
     event_time: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
     event_name: Mapped[str] = mapped_column(String(255), index=True)
     event_source: Mapped[str] = mapped_column(String(255), index=True)
@@ -25,4 +26,5 @@ class AccessLog(Base):
     
     __table_args__ = (
         Index('idx_access_log_time_arn', 'event_time', 'identity_arn'),
+        UniqueConstraint('event_id', 'workspace_id', name='uq_event_workspace'),
     )

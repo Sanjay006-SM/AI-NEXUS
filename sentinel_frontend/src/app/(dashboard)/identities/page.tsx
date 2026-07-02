@@ -1,127 +1,56 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Search, Download, ChevronDown, ChevronRight, MoreHorizontal, Shield, Server, Activity } from "lucide-react";
-
-// Sample Data
-const MOCK_IDENTITIES = [
-  { id: 1, score: 94, name: "i-prod-payments-svc", cloud: "AWS", env: "prod", region: "us-east-1", type: "IAM User", lastActivity: "2m ago", recommendation: "Rotate key · scope STS" },
-  { id: 2, score: 88, name: "k8s-prod-cluster-admin", cloud: "GKE", env: "prod", region: "europe-west4", type: "ServiceAccount", lastActivity: "12m ago", recommendation: "Down-scope RBAC" },
-  { id: 3, score: 81, name: "arn:terraform-ci-runner", cloud: "AWS", env: "prod", region: "us-west-2", type: "IAM Role", lastActivity: "27m ago", recommendation: "Pin subject claim" },
-  { id: 4, score: 76, name: "azure-fn-stripe-webhook", cloud: "Azure", env: "prod", region: "westeurope", type: "Managed Identity", lastActivity: "1h ago", recommendation: "Re-bind scope" },
-  { id: 5, score: 62, name: "gcp-sa-bigquery-etl", cloud: "GCP", env: "prod", region: "us-central1", type: "Service Account", lastActivity: "3h ago", recommendation: "Reduce dataset access" },
-  { id: 6, score: 58, name: "github-actions-deploy", cloud: "GitHub", env: "staging", region: "global", type: "OIDC", lastActivity: "5h ago", recommendation: "Add branch claim" },
-  { id: 7, score: 41, name: "vault-prod-renewer", cloud: "Vault", env: "prod", region: "us-east-1", type: "AppRole", lastActivity: "6h ago", recommendation: "Shorten TTL" },
-  { id: 8, score: 36, name: "snowflake-etl-svc", cloud: "Snowflake", env: "prod", region: "us-west-2", type: "Key Pair", lastActivity: "8h ago", recommendation: "Enable key pair auth" },
-  { id: 9, score: 28, name: "datadog-forwarder-fn", cloud: "AWS", env: "prod", region: "us-east-1", type: "Lambda", lastActivity: "12h ago", recommendation: "Trim log access" },
-  { id: 10, score: 14, name: "grafana-readonly-sa", cloud: "GCP", env: "staging", region: "eu-west1", type: "Service Account", lastActivity: "1d ago", recommendation: "Rotate credentials" },
-];
+import { useIdentities } from "@/lib/queries";
+import { Search, Download, ChevronDown, ChevronRight, BrainCircuit, GitBranch, Shield, Eye, Settings2 } from "lucide-react";
+import Link from "next/link";
 
 const getRiskConfig = (score: number) => {
-  if (score >= 80) return { label: "Critical", style: "bg-[#450a0a] text-[#ef4444] border-[#ef4444]/20" };
-  if (score >= 60) return { label: "High", style: "bg-[#7c2d12] text-[#f97316] border-[#f97316]/20" };
-  if (score >= 40) return { label: "Medium", style: "bg-[#78350f] text-[#fbbf24] border-[#fbbf24]/20" };
-  return { label: "Low", style: "bg-green-500/20 text-[#22c55e] border-[#22c55e]/20" };
-};
-
-const getCloudBadge = (cloud: string) => {
-  switch (cloud) {
-    case 'AWS': return "text-[#f97316] bg-[#f97316]/10 border-[#f97316]/20";
-    case 'GKE': return "text-[#3b82f6] bg-[#3b82f6]/10 border-[#3b82f6]/20";
-    case 'Azure': return "text-[#06b6d4] bg-[#06b6d4]/10 border-[#06b6d4]/20";
-    case 'GCP': return "text-[#22c55e] bg-[#22c55e]/10 border-[#22c55e]/20";
-    case 'GitHub': return "text-[#a855f7] bg-[#a855f7]/10 border-[#a855f7]/20";
-    case 'Vault': return "text-[#6366f1] bg-[#6366f1]/10 border-[#6366f1]/20";
-    case 'Snowflake': return "text-[#0ea5e9] bg-[#0ea5e9]/10 border-[#0ea5e9]/20";
-    default: return "text-text-muted bg-gray-400/10 border-gray-400/20";
-  }
-};
-
-const IdentityRow = ({ id, rank }: { id: typeof MOCK_IDENTITIES[0], rank: number }) => {
-  const [expanded, setExpanded] = useState(false);
-  const risk = getRiskConfig(id.score);
-
-  return (
-    <>
-      <tr 
-        onClick={() => setExpanded(!expanded)} 
-        className="hover:bg-white/10 cursor-pointer transition-colors border-b border-glass-subtle border group"
-      >
-        <td className="p-4 text-center font-mono text-text-muted text-sm">
-          <div className="flex items-center gap-2">
-            <ChevronRight className={`w-4 h-4 transition-transform ${expanded ? "rotate-90" : ""}`} />
-            {rank}
-          </div>
-        </td>
-        <td className="p-4">
-          <div className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-bold border ${risk.style}`}>
-            {risk.label} · {id.score}
-          </div>
-        </td>
-        <td className="p-4 font-bold text-text-primary text-sm truncate max-w-[200px]" title={id.name}>
-          {id.name}
-        </td>
-        <td className="p-4">
-          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wider ${getCloudBadge(id.cloud)}`}>
-            {id.cloud}
-          </span>
-        </td>
-        <td className="p-4 text-sm text-text-muted">
-          {id.env}
-        </td>
-        <td className="p-4 text-sm text-text-muted">
-          {id.region}
-        </td>
-        <td className="p-4 text-sm text-text-muted whitespace-nowrap">
-          {id.type}
-        </td>
-        <td className="p-4 text-xs font-mono text-text-muted whitespace-nowrap">
-          {id.lastActivity}
-        </td>
-        <td className="p-4 font-mono text-xs text-[#06b6d4] truncate max-w-[200px]" title={id.recommendation}>
-          {id.recommendation}
-        </td>
-        <td className="p-4 text-right">
-          <button className="p-1.5 text-text-muted hover:text-white hover:bg-glass-active rounded transition-colors" onClick={(e) => e.stopPropagation()}>
-            <MoreHorizontal className="w-4 h-4" />
-          </button>
-        </td>
-      </tr>
-      <AnimatePresence>
-        {expanded && (
-          <motion.tr
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <td colSpan={10} className="p-0 border-b border-glass-subtle border bg-glass-subtle">
-              <div className="p-6 pl-12 flex gap-4 items-start border-l-2 border-primary ml-4 my-4 bg-transparent rounded-r-lg">
-                <Shield className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm text-text-muted">
-                    Sentinel observed this identity assuming roles across <span className="font-bold text-text-primary">{Math.floor(Math.random() * 5) + 1}</span> accounts with permissions inconsistent with its baseline.
-                  </p>
-                  <div className="mt-2 text-sm text-text-muted">
-                    Recommended action: <span className="font-mono text-[#06b6d4] bg-[#06b6d4]/10 px-1.5 py-0.5 rounded">{id.recommendation}</span>
-                  </div>
-                  <div className="mt-4 flex gap-3">
-                    <button className="btn btn-primary h-8 px-4 text-xs">Apply Recommendation</button>
-                    <button className="btn bg-transparent border border-border hover:border-primary/50 text-text-secondary hover:text-primary h-8 px-4 text-xs transition-colors">View Activity Graph</button>
-                  </div>
-                </div>
-              </div>
-            </td>
-          </motion.tr>
-        )}
-      </AnimatePresence>
-    </>
-  );
+  if (score >= 80) return { label: "Critical", style: "bg-rose-50 text-rose-700 border-rose-100" };
+  if (score >= 60) return { label: "High", style: "bg-amber-50 text-amber-700 border-amber-100" };
+  if (score >= 40) return { label: "Medium", style: "bg-yellow-50 text-yellow-700 border-yellow-100" };
+  return { label: "Low", style: "bg-emerald-50 text-emerald-700 border-emerald-100" };
 };
 
 export default function MachineIdentitiesPage() {
+  const { data: identitiesData, isLoading } = useIdentities();
+
   const [searchQuery, setSearchQuery] = useState("");
+  const [severityFilter, setSeverityFilter] = useState("all");
+  const [cloudFilter, setCloudFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [riskSort, setRiskSort] = useState("desc");
+
+  // Format AWS IAM data or fall back to mock list
+  const activeIdentities = identitiesData || [];
+
+  const filteredIdentities = activeIdentities
+    .filter(id => {
+      // 1. Search Query
+      const matchesSearch = id.arn.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      // 2. Severity Filter
+      let matchesSeverity = true;
+      if (severityFilter === "critical") matchesSeverity = id.risk_score >= 80;
+      else if (severityFilter === "high") matchesSeverity = id.risk_score >= 60 && id.risk_score < 80;
+      else if (severityFilter === "medium") matchesSeverity = id.risk_score >= 40 && id.risk_score < 60;
+      else if (severityFilter === "low") matchesSeverity = id.risk_score < 40;
+
+      // 3. Cloud Filter
+      let matchesCloud = true;
+      if (cloudFilter === "aws") matchesCloud = id.arn.includes("aws");
+      else if (cloudFilter === "gcp") matchesCloud = id.arn.includes("gcp");
+
+      // 4. Status Filter
+      let matchesStatus = true;
+      if (statusFilter === "alert") matchesStatus = id.risk_score >= 60;
+      else if (statusFilter === "healthy") matchesStatus = id.risk_score < 60;
+
+      return matchesSearch && matchesSeverity && matchesCloud && matchesStatus;
+    })
+    .sort((a, b) => {
+      return riskSort === "desc" ? b.risk_score - a.risk_score : a.risk_score - b.risk_score;
+    });
 
   return (
     <div className="animate-in fade-in duration-500 pb-12 flex flex-col gap-6">
@@ -129,90 +58,171 @@ export default function MachineIdentitiesPage() {
       {/* Header */}
       <div className="flex flex-col gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-text-primary">Machine Identities</h1>
-          <p className="text-text-muted mt-1 text-sm">All machine identities tracked across your cloud accounts</p>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Identity Center</h1>
+          <p className="text-slate-500 mt-1 text-sm">Discovered machine identities, execution profiles, and risk vectors.</p>
         </div>
         
         {/* Stats Row */}
         <div className="flex flex-wrap items-center gap-3">
-          <div className="bg-transparent border border-glass-subtle rounded-md px-4 py-2 flex items-center gap-3">
-            <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">Total</span>
-            <span className="text-lg font-bold text-text-primary">9,124</span>
+          <div className="bg-white border border-slate-200 rounded-lg px-4 py-2 flex items-center gap-3 shadow-sm">
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Discovered</span>
+            <span className="text-lg font-bold text-slate-800">{activeIdentities.length}</span>
           </div>
-          <div className="bg-transparent border border-glass-subtle rounded-md px-4 py-2 flex items-center gap-3">
-            <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">Critical Risk</span>
-            <span className="text-lg font-bold text-[#ef4444]">42</span>
+          <div className="bg-white border border-slate-200 rounded-lg px-4 py-2 flex items-center gap-3 shadow-sm">
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Critical Risk</span>
+            <span className="text-lg font-bold text-rose-600">
+              {activeIdentities.filter(id => id.risk_score >= 80).length}
+            </span>
           </div>
-          <div className="bg-transparent border border-glass-subtle rounded-md px-4 py-2 flex items-center gap-3">
-            <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">High Risk</span>
-            <span className="text-lg font-bold text-[#f97316]">184</span>
-          </div>
-          <div className="bg-transparent border border-glass-subtle rounded-md px-4 py-2 flex items-center gap-3">
-            <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">Avg Risk Score</span>
-            <span className="text-lg font-bold text-text-primary">37.4</span>
+          <div className="bg-white border border-slate-200 rounded-lg px-4 py-2 flex items-center gap-3 shadow-sm">
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">High Risk</span>
+            <span className="text-lg font-bold text-amber-600">
+              {activeIdentities.filter(id => id.risk_score >= 60 && id.risk_score < 80).length}
+            </span>
           </div>
         </div>
       </div>
 
-      <div className="bg-transparent border border-glass-subtle rounded-xl flex flex-col overflow-hidden shadow-lg">
-        
-        {/* Filter Bar */}
-        <div className="p-4 border-b border-glass-subtle border flex flex-col md:flex-row md:items-center justify-between gap-4 bg-glass-subtle">
-          <div className="flex items-center gap-2">
-            <button className="flex items-center gap-2 px-3 py-1.5 bg-transparent border border-glass-subtle hover:border-glass-active rounded-md text-sm text-text-primary transition-colors">
-              All Clouds <ChevronDown className="w-3.5 h-3.5 text-text-muted" />
-            </button>
-            <button className="flex items-center gap-2 px-3 py-1.5 bg-transparent border border-glass-subtle hover:border-glass-active rounded-md text-sm text-text-primary transition-colors">
-              All Environments <ChevronDown className="w-3.5 h-3.5 text-text-muted" />
-            </button>
-            <button className="flex items-center gap-2 px-3 py-1.5 bg-transparent border border-glass-subtle hover:border-glass-active rounded-md text-sm text-text-primary transition-colors">
-              All Severities <ChevronDown className="w-3.5 h-3.5 text-text-muted" />
-            </button>
-          </div>
+      {/* Advanced Filters */}
+      <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+        <div className="p-4 border-b border-slate-100 flex flex-wrap items-center gap-4 bg-slate-50">
           
-          <div className="flex items-center gap-3">
+          {/* Cloud Select */}
+          <div className="flex flex-col gap-1 min-w-[120px]">
+            <label className="text-[10px] font-bold text-slate-400 uppercase">Cloud Provider</label>
+            <select
+              value={cloudFilter}
+              onChange={(e) => setCloudFilter(e.target.value)}
+              className="input-field h-8 text-xs py-1"
+            >
+              <option value="all">All Clouds</option>
+              <option value="aws">AWS IAM</option>
+              <option value="gcp">GCP (Coming Soon)</option>
+            </select>
+          </div>
+
+          {/* Severity Select */}
+          <div className="flex flex-col gap-1 min-w-[120px]">
+            <label className="text-[10px] font-bold text-slate-400 uppercase">Severity</label>
+            <select
+              value={severityFilter}
+              onChange={(e) => setSeverityFilter(e.target.value)}
+              className="input-field h-8 text-xs py-1"
+            >
+              <option value="all">All Severities</option>
+              <option value="critical">Critical (80+)</option>
+              <option value="high">High (60-79)</option>
+              <option value="medium">Medium (40-59)</option>
+              <option value="low">Low (&lt;40)</option>
+            </select>
+          </div>
+
+          {/* Status Select */}
+          <div className="flex flex-col gap-1 min-w-[120px]">
+            <label className="text-[10px] font-bold text-slate-400 uppercase">Status</label>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="input-field h-8 text-xs py-1"
+            >
+              <option value="all">All Statuses</option>
+              <option value="alert">Requires Attention</option>
+              <option value="healthy">Healthy</option>
+            </select>
+          </div>
+
+          {/* Sort Select */}
+          <div className="flex flex-col gap-1 min-w-[120px]">
+            <label className="text-[10px] font-bold text-slate-400 uppercase">Risk Sort</label>
+            <select
+              value={riskSort}
+              onChange={(e) => setRiskSort(e.target.value)}
+              className="input-field h-8 text-xs py-1"
+            >
+              <option value="desc">Highest Risk</option>
+              <option value="asc">Lowest Risk</option>
+            </select>
+          </div>
+
+          {/* Search bar */}
+          <div className="flex-1 flex flex-col gap-1 min-w-[200px] lg:ml-auto">
+            <label className="text-[10px] font-bold text-slate-400 uppercase">Search</label>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-              <input 
-                type="text" 
-                placeholder="Search by ARN, name, or tag..." 
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search by ARN, role name..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full md:w-64 pl-9 pr-4 py-1.5 bg-glass-subtle border border-glass-subtle hover:border-glass-active focus:border-primary focus:ring-1 focus:ring-primary/50 outline-none rounded-md text-sm text-text-primary font-mono placeholder:font-mono placeholder:text-text-muted transition-all"
+                className="w-full pl-8 input-field h-8 text-xs"
               />
             </div>
-            <button className="flex items-center gap-2 px-3 py-1.5 bg-transparent hover:bg-white/10 border border-glass-subtle rounded-md text-sm text-text-primary transition-colors">
-              <Download className="w-4 h-4 text-text-muted" />
-              Export
-            </button>
           </div>
         </div>
 
-        {/* Table */}
+        {/* Table View */}
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[1000px]">
-            <thead className="bg-glass-subtle border-b border-glass-subtle border text-xs uppercase tracking-wider text-text-muted font-bold sticky top-0 z-10">
-              <tr>
-                <th className="p-4 w-16 text-center">Rank</th>
-                <th className="p-4">Risk Score</th>
-                <th className="p-4">Identity Name</th>
-                <th className="p-4">Cloud</th>
-                <th className="p-4">Environment</th>
-                <th className="p-4">Region</th>
-                <th className="p-4">Type</th>
-                <th className="p-4">Last Activity</th>
-                <th className="p-4">Recommendation</th>
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-slate-50 border-b border-slate-100 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                <th className="p-4">Identity Profile</th>
+                <th className="p-4">Severity / Score</th>
+                <th className="p-4">ARN</th>
+                <th className="p-4">Provider</th>
                 <th className="p-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-glass-subtle bg-transparent">
-              {MOCK_IDENTITIES.map((id, index) => (
-                <IdentityRow key={id.id} id={id} rank={index + 1} />
-              ))}
+            <tbody className="divide-y divide-slate-100 text-sm">
+              {filteredIdentities.map(id => {
+                const config = getRiskConfig(id.risk_score);
+                return (
+                  <tr key={id.id} className="hover:bg-slate-50 transition-all group">
+                    <td className="p-4">
+                      <div className="flex flex-col">
+                        <span className="font-semibold text-slate-900">{(id.arn.split("/").pop() || id.arn).split(":").pop()}</span>
+                        <span className="text-[10px] text-slate-400 font-mono mt-0.5">{id.arn.slice(0, 45)}...</span>
+                      </div>
+                    </td>
+                    <td className="p-4">
+                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${config.style}`}>
+                        {config.label} ({id.risk_score})
+                      </span>
+                    </td>
+                    <td className="p-4 text-xs font-mono text-slate-500">{id.arn}</td>
+                    <td className="p-4 text-xs font-semibold text-slate-600">AWS IAM</td>
+                    <td className="p-4">
+                      <div className="flex items-center justify-end gap-2 opacity-80 group-hover:opacity-100 transition-opacity">
+                        {/* Explain Button */}
+                        <Link
+                          href={`/ai-investigation?identityId=${id.id}`}
+                          className="h-8 px-3 border border-slate-200 hover:border-indigo-400 text-slate-700 hover:text-indigo-600 rounded-lg flex items-center gap-1.5 text-xs bg-white transition-all shadow-sm"
+                        >
+                          <BrainCircuit className="w-3.5 h-3.5" />
+                          AI Explain
+                        </Link>
+                        {/* Graph Button */}
+                        <Link
+                          href={`/canvas/${id.id}`}
+                          className="h-8 px-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg flex items-center gap-1.5 text-xs transition-all shadow-sm shadow-indigo-100 font-semibold"
+                        >
+                          <GitBranch className="w-3.5 h-3.5" />
+                          Graph
+                        </Link>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+              {filteredIdentities.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-slate-400 text-xs">
+                    No machine identities match the selected filters.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
-        
       </div>
     </div>
   );

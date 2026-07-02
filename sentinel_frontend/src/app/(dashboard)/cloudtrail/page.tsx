@@ -1,177 +1,171 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Search, ChevronDown, Terminal, ShieldAlert, Cloud, HelpCircle, CheckCircle2 } from "lucide-react";
+import CloudTrailDropzone from "@/components/dashboard/CloudTrailDropzone";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, ChevronDown, Activity, Terminal, ShieldAlert } from "lucide-react";
+import { useRecentEvents } from "@/lib/queries";
 
-// --- Mock Data ---
-const MOCK_EVENTS = [
-  { id: "e1", time: "2s", provider: "AWS", event: "AssumeRole", arn: "arn:aws:iam::4129::role/payments-svc", tag: "+412% baseline", type: "ANOMALY" },
-  { id: "e2", time: "6s", provider: "AWS", event: "CreateAccessKey", arn: "arn:aws:iam::4129::user/ci-runner", tag: "new long-lived key", type: "ANOMALY" },
-  { id: "e3", time: "14s", provider: "GCP", event: "iam.SetIamPolicy", arn: "sa-bigquery-etl@acme", tag: "scope expanded", type: "INFO" },
-  { id: "e4", time: "22s", provider: "AWS", event: "RotateSecret", arn: "secretsmanager.amazonaws.com", tag: "auto by SentryIQ", type: "AUTO" },
-  { id: "e5", time: "31s", provider: "Azure", event: "RoleAssignment.Write", arn: "fn-stripe-webhook", tag: "owner → contributor", type: "INFO" },
-  { id: "e6", time: "47s", provider: "AWS", event: "ConsoleLogin", arn: "root@acme.io", tag: "MFA bypass attempt", type: "CRITICAL" },
-  { id: "e7", time: "1m", provider: "GKE", event: "k8s.exec", arn: "user:platform-on-call", tag: "session 8m12s", type: "INFO" },
-  { id: "e8", time: "1m", provider: "AWS", event: "DeleteTrail", arn: "arn:aws:cloudtrail::log-bucket", tag: "trail deletion", type: "ANOMALY" },
-  { id: "e9", time: "2m", provider: "GCP", event: "storage.objects.get", arn: "sa-bigquery-etl", tag: "card-vault/* bucket", type: "INFO" },
-  { id: "e10", time: "2m", provider: "Azure", event: "KeyVault.GetSecret", arn: "fn-payments-prod", tag: "unusual time access", type: "ANOMALY" },
-];
-
-const POOL = [
-  { provider: "AWS", event: "ListBuckets", arn: "arn:aws:iam::4129::user/auditor", tag: "routine scan", type: "INFO" },
-  { provider: "GCP", event: "compute.instances.insert", arn: "sa-compute@acme", tag: "new VM created", type: "INFO" },
-  { provider: "Azure", event: "KeyVault.SecretSet", arn: "fn-payments-prod", tag: "key rotation", type: "AUTO" },
-  { provider: "AWS", event: "GetCallerIdentity", arn: "arn:aws:iam::4129::role/eks-node", tag: "eks auth", type: "INFO" },
-  { provider: "GKE", event: "k8s.pod.delete", arn: "user:ci-cd", tag: "eviction", type: "INFO" },
-  { provider: "AWS", event: "AttachUserPolicy", arn: "arn:aws:iam::4129::user/dev", tag: "privilege granted", type: "ANOMALY" },
-];
-
-export default function CloudTrailEventsPage() {
-  const prefersReducedMotion = typeof window !== 'undefined' ? window.matchMedia('(prefers-reduced-motion: reduce)').matches : false;
-  const [events, setEvents] = useState(MOCK_EVENTS);
-
-  // Animate new events arriving every 3 seconds
-  useEffect(() => {
-    let count = 0;
-    const interval = setInterval(() => {
-      setEvents(prev => {
-        const poolEvent = POOL[count % POOL.length];
-        const newEvent = {
-          ...poolEvent,
-          id: `new-${Date.now()}`,
-          time: "0s",
-        };
-        // Update times for existing events (simplified mockup logic)
-        const updatedPrev = prev.map(e => {
-          if (e.time.endsWith('s')) {
-            const sec = parseInt(e.time);
-            return { ...e, time: sec + 3 > 59 ? '1m' : `${sec + 3}s` };
-          }
-          return e;
-        });
-        return [newEvent, ...updatedPrev].slice(0, 12); // keep top 12
-      });
-      count++;
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const getProviderBadge = (provider: string) => {
-    switch (provider) {
-      case "AWS": return "light-ct-prov-aws text-[#f97316] bg-[#f97316]/10 border-[#f97316]/20";
-      case "GCP": return "light-ct-prov-gcp text-[#3b82f6] bg-[#3b82f6]/10 border-[#3b82f6]/20";
-      case "Azure": return "light-ct-prov-azure text-[#06b6d4] bg-[#06b6d4]/10 border-[#06b6d4]/20";
-      case "GKE": return "light-ct-prov-gke text-[#a855f7] bg-[#a855f7]/10 border-[#a855f7]/20";
-      default: return "text-text-muted bg-[#64748b]/10 border-[#64748b]/20";
-    }
-  };
-
-  const getTagStyle = (type: string) => {
-    switch (type) {
-      case "ANOMALY": return "light-ct-alert-anomaly text-[#fbbf24] bg-[#78350f]/30 border-[#fbbf24]/20";
-      case "CRITICAL": return "light-ct-alert-priv text-[#ef4444] bg-[#450a0a]/50 border-[#ef4444]/20 font-bold";
-      case "AUTO": return "light-ct-alert-auto text-[#818cf8] bg-[#1e1b4b]/50 border-[#818cf8]/20";
-      default: return "light-ct-alert-default text-text-muted bg-glass-subtle border-glass-active border";
-    }
-  };
+export default function DataSourcesPage() {
+  const [activeTab, setActiveTab] = useState<"aws" | "azure" | "gcp">("aws");
+  const [searchQuery, setSearchQuery] = useState("");
+  const { data: events, isLoading } = useRecentEvents();
 
   return (
-    <div className="animate-in fade-in duration-500 pb-12 flex flex-col gap-6">
+    <div className="animate-in fade-in duration-500 pb-12 flex flex-col gap-8">
       
       {/* Header */}
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex flex-col">
-            <h1 className="text-2xl font-bold tracking-tight text-text-primary flex items-center gap-3 light-ct-header">
-              <Terminal className="w-6 h-6 text-primary" />
-              CloudTrail Events
-            </h1>
-            <p className="text-text-muted mt-1 text-sm light-ct-subtext">Streaming · 18 AWS accounts · 12 GCP projects · 8 Azure subs</p>
-          </div>
-          
-          {/* Live Badge */}
-          <div className="flex items-center gap-3 bg-green-100/50 border border-[#22c55e]/30 px-4 py-2 rounded-lg shadow-[0_0_15px_rgba(34,197,94,0.1)] light-ct-live-pill">
-            <div className="w-2.5 h-2.5 rounded-full bg-[#22c55e] animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.8)]"></div>
-            <span className="text-[#22c55e] font-mono font-bold text-sm tracking-wider">LIVE · 12.4k ev/min</span>
-          </div>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-3">
+            <Terminal className="w-6 h-6 text-indigo-600" />
+            Data Sources
+          </h1>
+          <p className="text-slate-500 mt-1 text-sm">Stream, upload, and connect log audits to identify anomalous access paths.</p>
         </div>
       </div>
 
-      {/* Filter Bar */}
-      <div className="glass-panel p-4 flex flex-col md:flex-row md:items-center gap-4 light-ct-filter">
-        <div className="flex flex-wrap items-center gap-2">
-          <button className="filter-dropdown flex items-center gap-2 px-3 py-1.5 bg-transparent border border-glass-subtle hover:border-glass-active rounded-md text-sm text-text-primary transition-colors">
-            Cloud Provider <ChevronDown className="w-3.5 h-3.5 text-text-muted" />
-          </button>
-          <button className="filter-dropdown flex items-center gap-2 px-3 py-1.5 bg-transparent border border-glass-subtle hover:border-glass-active rounded-md text-sm text-text-primary transition-colors">
-            Event Type <ChevronDown className="w-3.5 h-3.5 text-text-muted" />
-          </button>
-          <button className="filter-dropdown flex items-center gap-2 px-3 py-1.5 bg-transparent border border-glass-subtle hover:border-glass-active rounded-md text-sm text-text-primary transition-colors">
-            Time Range <ChevronDown className="w-3.5 h-3.5 text-text-muted" />
-          </button>
-        </div>
-        
-        <div className="relative flex-1 max-w-md ml-auto">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-          <input 
-            type="text" 
-            placeholder="Search ARN, identity, or resource..." 
-            className="w-full pl-9 pr-4 py-1.5 bg-glass-subtle border border-glass-subtle hover:border-glass-active focus:border-primary focus:ring-1 focus:ring-primary/50 outline-none rounded-md text-sm text-text-primary font-mono placeholder:font-mono placeholder:text-text-muted transition-all"
-          />
-        </div>
+      {/* Provider Tabs */}
+      <div className="flex border-b border-slate-200 gap-6">
+        <button
+          onClick={() => setActiveTab("aws")}
+          className={`pb-3 text-sm font-semibold border-b-2 transition-all ${
+            activeTab === "aws" 
+              ? "border-indigo-600 text-indigo-600" 
+              : "border-transparent text-slate-500 hover:text-slate-900"
+          }`}
+        >
+          Amazon Web Services (AWS)
+        </button>
+        <button
+          onClick={() => setActiveTab("azure")}
+          className={`pb-3 text-sm font-semibold border-b-2 transition-all ${
+            activeTab === "azure" 
+              ? "border-indigo-600 text-indigo-600" 
+              : "border-transparent text-slate-500 hover:text-slate-900"
+          }`}
+        >
+          Microsoft Azure (Coming Soon)
+        </button>
+        <button
+          onClick={() => setActiveTab("gcp")}
+          className={`pb-3 text-sm font-semibold border-b-2 transition-all ${
+            activeTab === "gcp" 
+              ? "border-indigo-600 text-indigo-600" 
+              : "border-transparent text-slate-500 hover:text-slate-900"
+          }`}
+        >
+          Google Cloud (Coming Soon)
+        </button>
       </div>
 
-      {/* Events Stream Panel */}
-      <div className="bg-transparent border border-glass-subtle rounded-xl flex flex-col overflow-hidden shadow-lg h-[650px] light-ct-table-container">
-        <div className="flex-1 overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-glass-active scrollbar-track-transparent">
-          <div className="flex flex-col gap-1">
-            <AnimatePresence initial={false}>
-              {events.map((ev) => (
-                <motion.div
-                  key={ev.id}
-                  initial={{ opacity: 0, x: prefersReducedMotion ? 0 : -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, scale: prefersReducedMotion ? 1 : 0.95 }}
-                  transition={{ duration: prefersReducedMotion ? 0 : 0.15 }}
-                  className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 rounded-lg hover:bg-white/10 border border-transparent hover:border-glass-active transition-colors group light-ct-row"
-                >
-                  {/* Timestamp */}
-                  <div className="bg-glass-subtle border border-glass-subtle text-text-muted font-mono text-xs px-2 py-1 rounded w-12 text-center shrink-0 group-hover:text-slate-500 ct-time">
-                    {ev.time}
-                  </div>
-                  
-                  {/* Provider */}
-                  <div className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border shrink-0 text-center w-14 ${getProviderBadge(ev.provider)}`}>
-                    {ev.provider}
-                  </div>
+      {activeTab === "aws" && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+          {/* Dropzone & connection details */}
+          <div className="lg:col-span-2 flex flex-col gap-6">
+            
+            {/* Ingestion Dropzone */}
+            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col gap-4">
+              <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <Cloud className="w-4.5 h-4.5 text-indigo-600" />
+                Demo Mode: Ingest CloudTrail JSON File
+              </h2>
+              <p className="text-xs text-slate-500">
+                Upload static log exports manually. We construct graphs and evaluate risk scores instantly.
+              </p>
+              <CloudTrailDropzone />
+            </div>
 
-                  {/* Event Name */}
-                  <div className="font-bold text-text-primary text-sm shrink-0 w-44 ct-action">
-                    {ev.event}
-                  </div>
+            {/* Production Connect AWS Coming Soon */}
+            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col gap-4 relative opacity-90 hover:opacity-100 transition-opacity">
+              <div className="absolute top-4 right-4">
+                <span className="bg-slate-100 border border-slate-200 text-slate-500 px-2.5 py-0.5 rounded text-[10px] font-bold">
+                  COMING SOON
+                </span>
+              </div>
+              <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <Cloud className="w-4.5 h-4.5 text-indigo-600" />
+                Production: Connect AWS Account
+              </h2>
+              <p className="text-xs text-slate-500">
+                Configure automated IAM read-only cross-account access or point an S3 bucket stream for live posture tracking.
+              </p>
+              <button disabled className="btn border border-slate-200 bg-slate-50 text-slate-400 text-xs w-fit h-9 cursor-not-allowed">
+                Setup IAM cross-account access
+              </button>
+            </div>
 
-                  {/* ARN */}
-                  <div className="font-mono text-[#06b6d4] text-xs truncate flex-1 ct-arn" title={ev.arn}>
-                    {ev.arn}
-                  </div>
+          </div>
 
-                  {/* Tag / Anomaly */}
-                  <div className="shrink-0 flex items-center justify-end min-w-[150px]">
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs border ${getTagStyle(ev.type)}`}>
-                      {ev.type === 'CRITICAL' && <ShieldAlert className="w-3.5 h-3.5" />}
-                      <span className="ct-note">{ev.tag}</span>
-                      {ev.type !== 'INFO' && <span className="uppercase text-[9px] font-bold opacity-70 ml-1">[{ev.type}]</span>}
-                    </span>
-                  </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
+          {/* Activity Logs details sidebar */}
+          <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col gap-4">
+            <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+              <HelpCircle className="w-4.5 h-4.5 text-indigo-600" />
+              Ingestion Details
+            </h2>
+            <div className="flex flex-col gap-3 text-xs leading-normal">
+              <span className="text-slate-500 font-medium">No ingestion statistics available.</span>
+            </div>
           </div>
         </div>
+      )}
+
+      {/* Stream activity logs table */}
+      <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
+        <div className="p-4 border-b border-slate-100 bg-slate-50">
+          <h2 className="text-sm font-bold text-slate-800">Telemetry Event Activity Stream</h2>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-slate-50 border-b border-slate-100 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                <th className="p-4">Time</th>
+                <th className="p-4">Event Action</th>
+                <th className="p-4">Identity (ARN)</th>
+                <th className="p-4">Source IP</th>
+                <th className="p-4">Status / Risk</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 text-sm font-mono text-slate-600">
+              {isLoading ? (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-slate-400">Loading events...</td>
+                </tr>
+              ) : !events || events.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-slate-400">No events ingested yet.</td>
+                </tr>
+              ) : (
+                events.map((ev: any) => (
+                  <tr key={ev.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="p-4 text-xs text-slate-400 whitespace-nowrap">
+                      {new Date(ev.event_time).toLocaleString()}
+                    </td>
+                    <td className="p-4 font-semibold text-slate-900">{ev.event}</td>
+                    <td className="p-4 text-xs text-slate-500 truncate max-w-[250px]">{ev.user}</td>
+                    <td className="p-4 text-xs text-slate-500">{ev.source}</td>
+                    <td className="p-4 flex flex-col gap-1 items-start">
+                      <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold border ${
+                        ev.status === "Success" 
+                          ? "bg-emerald-50 text-emerald-700 border-emerald-100" 
+                          : "bg-rose-50 text-rose-700 border-rose-100"
+                      }`}>
+                        {ev.status}
+                      </span>
+                      {ev.isAnomaly && (
+                        <span className="inline-flex px-2 py-0.5 rounded text-[10px] font-bold border bg-amber-50 text-amber-700 border-amber-100">
+                          {ev.anomalyReason}
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
-      
+
     </div>
   );
 }

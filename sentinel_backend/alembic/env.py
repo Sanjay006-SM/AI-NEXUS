@@ -34,7 +34,7 @@ target_metadata = Base.metadata
 # ... etc.
 
 # Overwrite the sqlalchemy.url from alembic.ini with the one from app config
-config.set_main_option("sqlalchemy.url", settings.SQLALCHEMY_DATABASE_URI)
+config.set_main_option("sqlalchemy.url", settings.SQLALCHEMY_DATABASE_URI.replace("%", "%%"))
 
 
 def run_migrations_offline() -> None:

@@ -12,9 +12,9 @@ class InvestigationService:
         self.builder = PromptBuilder()
         self.ai = AIAnalystService()
 
-    def investigate(self, identity_id: str) -> Dict[str, Any]:
+    def investigate(self, identity_id: str, workspace_id: str) -> Dict[str, Any]:
         # 1. Collect Evidence
-        evidence = self.collector.collect_evidence(identity_id)
+        evidence = self.collector.collect_evidence(identity_id, workspace_id)
         if not evidence or "error" in evidence:
             return evidence or {"error": "Identity not found or no evidence available."}
             

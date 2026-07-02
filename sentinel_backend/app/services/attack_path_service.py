@@ -6,8 +6,8 @@ class AttackPathService:
     def __init__(self, session: Session):
         self.session = session
 
-    def get_attack_path(self, arn: str) -> Dict[str, Any]:
-        result = self.session.run(q.GET_ATTACK_PATH, arn=arn)
+    def get_attack_path(self, arn: str, workspace_id: str) -> Dict[str, Any]:
+        result = self.session.run(q.GET_ATTACK_PATH, arn=arn, workspace_id=workspace_id)
         
         nodes_dict = {}
         edges_list = []

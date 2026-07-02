@@ -13,7 +13,7 @@ class EvidenceCollector:
         self.graph = graph
         self.attack_path_svc = AttackPathService(graph)
 
-    def collect_evidence(self, identity_id: str) -> Dict[str, Any]:
+    def collect_evidence(self, identity_id: str, workspace_id: str) -> Dict[str, Any]:
         evidence = {}
         
         # 1. Identity Metadata
@@ -21,9 +21,9 @@ class EvidenceCollector:
         try:
             import uuid
             uuid_obj = uuid.UUID(identity_id)
-            identity = self.db.query(MachineIdentity).filter(MachineIdentity.id == uuid_obj).first()
+            identity = self.db.query(MachineIdentity).filter(MachineIdentity.id == uuid_obj, MachineIdentity.workspace_id == workspace_id).first()
         except ValueError:
-            identity = self.db.query(MachineIdentity).filter(MachineIdentity.arn == identity_id).first()
+            identity = self.db.query(MachineIdentity).filter(MachineIdentity.arn == identity_id, MachineIdentity.workspace_id == workspace_id).first()
             
         if not identity:
             return {"error": f"Identity '{identity_id}' not found."}
@@ -37,7 +37,7 @@ class EvidenceCollector:
         }
         
         # 2. Risk Score & Reasons
-        score = self.db.query(RiskScore).filter(RiskScore.identity_id == identity.id).first()
+        score = self.db.query(RiskScore).filter(RiskScore.identity_id == identity.id, RiskScore.workspace_id == workspace_id).first()
         if score:
             evidence["risk"] = {
                 "score": score.score,
@@ -48,7 +48,7 @@ class EvidenceCollector:
             evidence["risk"] = {"score": 0, "severity": "Low", "reasons": []}
             
         # 3. Recent Activity (Sampled) - Limit to top 20 to optimize token usage
-        recent_logs = self.db.query(AccessLog).filter(AccessLog.identity_arn == identity.arn)\
+        recent_logs = self.db.query(AccessLog).filter(AccessLog.identity_arn == identity.arn, AccessLog.workspace_id == workspace_id)\
             .order_by(AccessLog.event_time.desc()).limit(20).all()
             
         evidence["recent_activity"] = [
@@ -62,7 +62,7 @@ class EvidenceCollector:
         ]
         
         # 4. Attack Path Graph Data & Summary
-        path_data = self.attack_path_svc.get_attack_path(identity.arn)
+        path_data = self.attack_path_svc.get_attack_path(identity.arn, workspace_id)
         edges_summary = [edge['label'] for edge in path_data.get("edges", [])]
         
         evidence["attack_path"] = {
@@ -75,8 +75,8 @@ class EvidenceCollector:
         # 5. Relationship Counts (Neo4j)
         rel_counts = {}
         for rel_type in ["ACCESSED_RESOURCE", "ORIGINATED_FROM", "ASSUMED_ROLE"]:
-            query = f"MATCH (i:Identity {{arn: $arn}})-[:{rel_type}]->(target) RETURN count(target) as count"
-            res = self.graph.run(query, arn=identity.arn).single()
+            query = f"MATCH (i:Identity {{arn: $arn, workspace_id: $workspace_id}})-[:{rel_type}]->(target {{workspace_id: $workspace_id}}) RETURN count(target) as count"
+            res = self.graph.run(query, arn=identity.arn, workspace_id=workspace_id).single()
             rel_counts[rel_type.lower() + "_count"] = res["count"] if res else 0
         evidence["relationship_counts"] = rel_counts
 
@@ -90,12 +90,14 @@ class EvidenceCollector:
         for key, service in sensitive_services.items():
             count = self.db.query(AccessLog).filter(
                 AccessLog.identity_arn == identity.arn,
+                AccessLog.workspace_id == workspace_id,
                 AccessLog.event_source == service
             ).count()
             sensitive_summary[key] = count
             
         s3_sensitive_count = self.db.query(AccessLog).filter(
             AccessLog.identity_arn == identity.arn,
+            AccessLog.workspace_id == workspace_id,
             AccessLog.event_source == 's3.amazonaws.com',
             AccessLog.event_name.in_(['DeleteBucket', 'DeleteObject', 'PutBucketAcl', 'PutBucketPolicy'])
         ).count()
