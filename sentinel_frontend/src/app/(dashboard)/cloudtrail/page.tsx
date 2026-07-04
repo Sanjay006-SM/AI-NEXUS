@@ -68,31 +68,31 @@ export default function DataSourcesPage() {
             <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col gap-4">
               <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                 <Cloud className="w-4.5 h-4.5 text-indigo-600" />
-                Demo Mode: Ingest CloudTrail JSON File
+                Offline Import: Ingest CloudTrail JSON File
               </h2>
               <p className="text-xs text-slate-500">
-                Upload static log exports manually. We construct graphs and evaluate risk scores instantly.
+                Upload static log exports manually for offline analysis. We construct graphs and evaluate risk scores instantly.
               </p>
               <CloudTrailDropzone />
             </div>
 
-            {/* Live AWS Connect — fully implemented */}
-            <div className="bg-white border border-indigo-200 rounded-xl p-6 shadow-sm flex flex-col gap-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                  <Cloud className="w-4.5 h-4.5 text-indigo-600" />
-                  Live Sync: Connect AWS Account
-                </h2>
-                <span className="bg-emerald-100 border border-emerald-200 text-emerald-700 px-2.5 py-0.5 rounded text-[10px] font-bold">
-                  AVAILABLE
+            {/* Production Connect AWS Coming Soon */}
+            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col gap-4 relative opacity-90 hover:opacity-100 transition-opacity">
+              <div className="absolute top-4 right-4">
+                <span className="bg-slate-100 border border-slate-200 text-slate-500 px-2.5 py-0.5 rounded text-[10px] font-bold">
+                  COMING SOON
                 </span>
               </div>
+              <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <Cloud className="w-4.5 h-4.5 text-indigo-600" />
+                Production: Connect AWS Account
+              </h2>
               <p className="text-xs text-slate-500">
-                Configure automated IAM read-only cross-account access to stream CloudTrail events live into SentinelAI.
+                Configure automated IAM read-only cross-account access or point an S3 bucket stream for live posture tracking.
               </p>
-              <a href="/integrations/aws" className="btn btn-primary text-xs w-fit h-9 flex items-center gap-2">
-                <CheckCircle2 className="w-3.5 h-3.5" /> Configure Live AWS Integration
-              </a>
+              <button disabled className="btn border border-slate-200 bg-slate-50 text-slate-400 text-xs w-fit h-9 cursor-not-allowed">
+                Setup IAM cross-account access
+              </button>
             </div>
 
           </div>

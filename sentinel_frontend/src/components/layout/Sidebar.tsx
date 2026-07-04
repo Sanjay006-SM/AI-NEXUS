@@ -24,7 +24,7 @@ const navItems = [
   { name: "Identity Center", href: "/identities", icon: Users },
   { name: "Investigations", href: "/attack-graph", icon: GitBranch },
   { name: "Risk Center", href: "/risk-findings", icon: ShieldAlert },
-  { name: "Cloud Accounts", href: "/integrations", icon: Cloud },
+  { name: "Integrations", href: "/integrations", icon: Cloud },
   { name: "Data Sources", href: "/cloudtrail", icon: Terminal },
   { name: "SentinelAI Copilot", href: "/ai-investigation", icon: BrainCircuit },
 

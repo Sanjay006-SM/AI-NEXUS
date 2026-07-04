@@ -39,17 +39,27 @@ class ExplainabilityService:
         prompt = self.prompt_builder.build_prompt(evidence, metrics, risk_factors)
         
         # 4. Generate Explainability via AI Analyst Service
-        raw_explanation = self.ai_service.generate_finding_explanation(prompt)
-        
-        # 5. Handle success/failure
-        if raw_explanation:
-            validated_explanation = self.validator.validate(raw_explanation, evidence)
-            payload["explainability"] = validated_explanation
-            payload["ai_status"] = "success"
-        else:
-            logger.warning(f"AI Explainability failed for finding {finding_id}. Using fallback.")
-            payload["explainability"] = self._generate_fallback(risk_factors, metrics, evidence)
-            payload["ai_status"] = "unavailable"
+        try:
+            from app.services.ai.ai_analyst_service import GeminiRateLimitError
+            raw_explanation = self.ai_service.generate_finding_explanation(prompt)
+            
+            # 5. Handle success/failure
+            if raw_explanation:
+                validated_explanation = self.validator.validate(raw_explanation, evidence)
+                payload["explainability"] = validated_explanation
+                payload["ai_status"] = "success"
+            else:
+                logger.warning(f"AI Explainability failed for finding {finding_id}. Using fallback.")
+                payload["explainability"] = self._generate_fallback(risk_factors, metrics, evidence)
+                payload["ai_status"] = "unavailable"
+        except GeminiRateLimitError as re:
+            logger.warning(f"AI Explainability rate limited (429) for finding {finding_id}: {re}")
+            payload["explainability"] = (
+                "⚠️ Gemini API rate limit exceeded (429). "
+                "Displaying dynamic rule-based graph analysis context below:\n\n"
+                + self._generate_fallback(risk_factors, metrics, evidence)
+            )
+            payload["ai_status"] = "rate_limited"
             
         return payload
 
