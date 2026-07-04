@@ -1,8 +1,0 @@
-{
-  "builds": [
-    {
-      "src": "sentinel_frontend/package.json",
-      "use": "@vercel/next"
-    }
-  ]
-}
