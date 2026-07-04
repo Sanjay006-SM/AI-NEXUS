@@ -23,6 +23,17 @@ export const useRecentFindings = () => {
   });
 };
 
+export const useFindingDetails = (findingId: string) => {
+  return useQuery({
+    queryKey: ['findingDetails', findingId],
+    queryFn: async (): Promise<any> => {
+      const res = await api.get(`/findings/${findingId}`);
+      return res;
+    },
+    enabled: !!findingId,
+  });
+};
+
 export const useRecentEvents = () => {
   return useQuery({
     queryKey: ['recentEvents'],
