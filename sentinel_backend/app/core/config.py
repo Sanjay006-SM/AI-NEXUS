@@ -42,6 +42,9 @@ class Settings(BaseSettings):
     # JWT Security config
     SECRET_KEY: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7 # 7 days
+    
+    # Feature Flags
+    ENABLE_GRAPH_EVIDENCE_ENGINE: bool = False
 
     class Config:
         case_sensitive = True
