@@ -13,11 +13,21 @@ class Settings(BaseSettings):
     POSTGRES_DB: str = "sentinel"
     POSTGRES_PORT: str = "5433"
 
+
+    # Cloud database URL (Render/Neon)
+    DATABASE_URL: str = "postgresql://sentinel_user:l4IaSlVt57Fug5tP6bQPy4byVTlFkaCe@dpg-d94blelckfvc739mftog-a.oregon-postgres.render.com/sentinel_jjiv"
+    
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> str:
+         # If DATABASE_URL is provided, use it.
+        if self.DATABASE_URL:
+            return self.DATABASE_URL
         import urllib.parse
         encoded_password = urllib.parse.quote(self.POSTGRES_PASSWORD, safe='')
-        return f"postgresql://{self.POSTGRES_USER}:{encoded_password}@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+        return (
+        f"postgresql://{self.POSTGRES_USER}:{encoded_password}"
+        f"@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+    )
 
     # Neo4j config
     NEO4J_URI: str = "bolt://localhost:7687"
