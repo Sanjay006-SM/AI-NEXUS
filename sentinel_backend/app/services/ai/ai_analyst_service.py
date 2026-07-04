@@ -12,6 +12,9 @@ from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
+class GeminiRateLimitError(Exception):
+    pass
+
 class AIAnalystService:
     def __init__(self):
         api_key = settings.GEMINI_API_KEY or os.getenv("GEMINI_API_KEY")
@@ -185,11 +188,15 @@ class AIAnalystService:
             }))
             return response_text.strip()
         except Exception as e:
+            error_str = str(e).lower()
+            is_429 = "429" in error_str or "quota" in error_str or "rate limit" in error_str or "exhausted" in error_str
             logger.error(json.dumps({
                 "stage": "AI_EXPLAINABILITY_GENERATION",
                 "status": "FAILED",
                 "error": str(e),
                 "stack_trace": traceback.format_exc()
             }))
+            if is_429:
+                raise GeminiRateLimitError(str(e))
             return None
 
