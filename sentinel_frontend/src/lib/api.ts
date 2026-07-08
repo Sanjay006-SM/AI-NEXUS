@@ -1,7 +1,6 @@
 import { useGlobalStore } from './store';
 
-const rawUrl = process.env.NEXT_PUBLIC_API_URL || 'https://ai-nexus-backend-cndm.onrender.com/api/v1';
-const BASE_URL = rawUrl.endsWith('/api/v1') ? rawUrl : `${rawUrl.replace(/\/$/, '')}/api/v1`;
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://ai-nexus-backend-cndm.onrender.com/api/v1';
 
 class ApiClient {
   async get(endpoint: string) {
