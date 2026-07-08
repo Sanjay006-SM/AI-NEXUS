@@ -839,3 +839,19 @@
    Utility: Hide bg-orbs (no longer needed)
    ============================================================================ */
 #bg-orbs { display: none; }
+@layer utilities {
+  .marker {
+    position: relative;
+    background: transparent;
+    color: inherit;
+  }
+  .marker::before {
+    content: "";
+    position: absolute;
+    inset: 0 -4px;
+    border-radius: 6px;
+    background-color: rgba(197, 49, 185, 0.15);
+    z-index: -1;
+  }
+}
+

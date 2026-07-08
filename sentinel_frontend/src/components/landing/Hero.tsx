@@ -16,7 +16,7 @@ export default function Hero() {
           transition={{ duration: 0.4 }}
           className="font-serif font-bold text-[48px] lg:text-[64px] leading-[1.05] text-indigo-600 tracking-tight"
         >
-          Turn cloud identity risks into continuous protection
+          Turn cloud <span className="text-[#1A1A2E] highlight">identity risks</span> into continuous <span className="text-[#1A1A2E] highlight">protection</span>
         </motion.h1>
 
         <motion.p 
