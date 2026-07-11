@@ -1,6 +1,9 @@
+import logging
+import traceback
 from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.api.dependencies import get_db, get_current_active_user
 from app.core.config import settings
@@ -8,42 +11,57 @@ from app.core.security import hash_password, verify_password, create_access_toke
 from app.models.tenant import Organization, User, Workspace
 from app.schemas.auth import UserRegister, UserLogin, Token, AuthMeResponse, GoogleLoginRequest
 import secrets
+
+# Google token verification
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
+from google.auth.exceptions import GoogleAuthError
 
 from app.core.events.bus import event_bus
 from app.core.events.contracts import AuditEvent
-from app.core.events.event_types import ActorClassification, EventCategory, EventSeverity, EventStatus, ResourceClassification
+from app.core.events.event_types import (
+    ActorClassification, EventCategory, EventSeverity, EventStatus, ResourceClassification
+)
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
-def provision_new_account(db: Session, email: str, full_name: str, password_hash: str, organization_name: str, workspace_name: str, provider: str = "LOCAL", google_id: str = None, profile_picture: str = None) -> User:
-    # Check if organization slug exists
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Helper: provision a completely new tenant account
+# ─────────────────────────────────────────────────────────────────────────────
+def provision_new_account(
+    db: Session,
+    email: str,
+    full_name: str,
+    password_hash: str,
+    organization_name: str,
+    workspace_name: str,
+    provider: str = "LOCAL",
+    google_id: str = None,
+    profile_picture: str = None,
+) -> User:
+    # Generate a unique slug
     base_slug = organization_name.lower().replace(" ", "-")
     slug = base_slug
     counter = 1
     while db.query(Organization).filter(Organization.slug == slug).first():
         slug = f"{base_slug}-{counter}"
         counter += 1
-        
-    # Create Organization
-    org = Organization(
-        name=organization_name,
-        slug=slug
-    )
+
+    org = Organization(name=organization_name, slug=slug)
     db.add(org)
-    
+
     try:
-        db.flush() # To ensure we can catch unique constraint errors if needed
-        # Create Default Workspace
+        db.flush()  # Catch unique constraint violations early
+
         workspace = Workspace(
             name=workspace_name,
             environment="Production",
-            organization_id=org.id
+            organization_id=org.id,
         )
         db.add(workspace)
-        
-        # Create User
+
         user = User(
             email=email,
             full_name=full_name,
@@ -53,35 +71,48 @@ def provision_new_account(db: Session, email: str, full_name: str, password_hash
             profile_picture=profile_picture,
             organization_id=org.id,
             role="admin",
-            is_active=True
+            is_active=True,
         )
         db.add(user)
         db.commit()
         db.refresh(user)
         return user
-    except Exception as e:
+    except SQLAlchemyError as exc:
         db.rollback()
-        raise HTTPException(status_code=500, detail="Transaction failed during account creation")
+        logger.error("DB error during account creation for %s: %s", email, traceback.format_exc())
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Account creation failed due to a database error. Please try again.",
+        ) from exc
+    except Exception as exc:
+        db.rollback()
+        logger.error("Unexpected error during account creation: %s", traceback.format_exc())
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred during account creation.",
+        ) from exc
 
+
+# ─────────────────────────────────────────────────────────────────────────────
+# POST /register
+# ─────────────────────────────────────────────────────────────────────────────
 @router.post("/register", response_model=Token, status_code=status.HTTP_201_CREATED)
 def register_user(user_in: UserRegister, db: Session = Depends(get_db)):
-    # Check if user exists
     user = db.query(User).filter(User.email == user_in.email).first()
     if user:
         raise HTTPException(
-            status_code=400,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="The user with this email already exists in the system.",
         )
-    
-    # Check if organization slug exists (legacy behavior preservation)
+
     slug = user_in.organization_name.lower().replace(" ", "-")
     org = db.query(Organization).filter(Organization.slug == slug).first()
     if org:
         raise HTTPException(
-            status_code=400,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="An organization with this name already exists.",
         )
-    
+
     user = provision_new_account(
         db=db,
         email=user_in.email,
@@ -89,22 +120,29 @@ def register_user(user_in: UserRegister, db: Session = Depends(get_db)):
         password_hash=hash_password(user_in.password),
         organization_name=user_in.organization_name,
         workspace_name=user_in.workspace_name,
-        provider="LOCAL"
+        provider="LOCAL",
     )
-    
+
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        subject=str(user.id), secret_key=settings.SECRET_KEY, expires_delta=access_token_expires
+        subject=str(user.id),
+        secret_key=settings.SECRET_KEY,
+        expires_delta=access_token_expires,
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
+
+# ─────────────────────────────────────────────────────────────────────────────
+# POST /login
+# ─────────────────────────────────────────────────────────────────────────────
 @router.post("/login", response_model=Token)
 def login(user_in: UserLogin, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == user_in.email).first()
-    if user and user.provider == "GOOGLE":
+
+    if user and user.provider == "GOOGLE" and not user.password_hash:
         raise HTTPException(
-            status_code=400,
-            detail="This account uses Google Sign-In. Please continue with Google or set a password first."
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="This account uses Google Sign-In. Please continue with Google or set a password first.",
         )
 
     if not user or not verify_password(user_in.password, user.password_hash):
@@ -113,154 +151,274 @@ def login(user_in: UserLogin, db: Session = Depends(get_db)):
             detail="Incorrect email or password",
         )
     if not user.is_active:
-        raise HTTPException(status_code=400, detail="Inactive user")
-        
-        
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user")
+
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        subject=str(user.id), secret_key=settings.SECRET_KEY, expires_delta=access_token_expires
+        subject=str(user.id),
+        secret_key=settings.SECRET_KEY,
+        expires_delta=access_token_expires,
     )
-    
+
     workspace = db.query(Workspace).filter(Workspace.organization_id == user.organization_id).first()
     if workspace:
-        event_bus.publish(AuditEvent(
-            workspace_id=str(workspace.id),
-            organization_id=str(user.organization_id),
-            actor=user.email,
-            actor_type=ActorClassification.HUMAN_USER,
-            module="Authentication",
-            action="LOGIN_SUCCESS",
-            category=EventCategory.AUTHENTICATION,
-            severity=EventSeverity.INFO,
-            status=EventStatus.SUCCESS,
-            resource_type=ResourceClassification.SYSTEM
-        ))
-        
+        try:
+            event_bus.publish(
+                AuditEvent(
+                    workspace_id=str(workspace.id),
+                    organization_id=str(user.organization_id),
+                    actor=user.email,
+                    actor_type=ActorClassification.HUMAN_USER,
+                    module="Authentication",
+                    action="LOGIN_SUCCESS",
+                    category=EventCategory.AUTHENTICATION,
+                    severity=EventSeverity.INFO,
+                    status=EventStatus.SUCCESS,
+                    resource_type=ResourceClassification.SYSTEM,
+                )
+            )
+        except Exception:
+            logger.warning("Audit event failed for LOGIN_SUCCESS (non-fatal): %s", traceback.format_exc())
+
     return {"access_token": access_token, "token_type": "bearer"}
 
+
+# ─────────────────────────────────────────────────────────────────────────────
+# POST /google   — full production-hardened Google OAuth flow
+# ─────────────────────────────────────────────────────────────────────────────
 @router.post("/google", response_model=Token)
 def google_auth(request: GoogleLoginRequest, db: Session = Depends(get_db)):
+    # ── 0. Guard: GOOGLE_CLIENT_ID must be configured ────────────────────────
+    if not settings.GOOGLE_CLIENT_ID:
+        logger.error("Google Sign-In attempted but GOOGLE_CLIENT_ID is not set on the server.")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Google Sign-In is not configured on this server. Contact the administrator.",
+        )
+
+    # ── 1. Verify the Google ID Token ────────────────────────────────────────
     try:
         idinfo = id_token.verify_oauth2_token(
-            request.credential, 
-            google_requests.Request(), 
-            settings.GOOGLE_CLIENT_ID
+            request.credential,
+            google_requests.Request(),
+            settings.GOOGLE_CLIENT_ID,
+            clock_skew_in_seconds=10,  # Tolerate minor clock drift
         )
-    except ValueError:
-        raise HTTPException(status_code=401, detail="Invalid Google token")
-        
+    except GoogleAuthError as exc:
+        logger.warning("Google token verification failed (GoogleAuthError): %s", str(exc))
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired Google token. Please sign in again.",
+        ) from exc
+    except ValueError as exc:
+        logger.warning("Google token verification failed (ValueError): %s", str(exc))
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid Google token. Please sign in again.",
+        ) from exc
+    except Exception as exc:
+        logger.error("Unexpected error during Google token verification: %s", traceback.format_exc())
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Token verification failed due to a server error.",
+        ) from exc
+
+    # ── 2. Validate issuer ───────────────────────────────────────────────────
+    valid_issuers = {"accounts.google.com", "https://accounts.google.com"}
+    if idinfo.get("iss") not in valid_issuers:
+        logger.warning("Google token has invalid issuer: %s", idinfo.get("iss"))
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Google token issuer is invalid.",
+        )
+
+    # ── 3. Validate email_verified ───────────────────────────────────────────
     if not idinfo.get("email_verified"):
-        raise HTTPException(status_code=400, detail="Google email is not verified")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Your Google account email is not verified. Please verify your email with Google first.",
+        )
 
-    email = idinfo["email"]
-    google_id = idinfo["sub"]
-    name = idinfo.get("name", "Google User")
-    picture = idinfo.get("picture")
+    # ── 4. Extract claims ────────────────────────────────────────────────────
+    email: str = idinfo.get("email", "").lower().strip()
+    google_id: str = idinfo.get("sub", "")
+    name: str = idinfo.get("name", "Google User")
+    picture: str = idinfo.get("picture", "")
 
-    user = db.query(User).filter(User.google_id == google_id).first()
+    if not email or not google_id:
+        logger.error("Google token missing required claims. idinfo keys: %s", list(idinfo.keys()))
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Google token is missing required user information.",
+        )
 
-    if not user:
-        user = db.query(User).filter(User.email == email).first()
-        if user:
-            if user.google_id and user.google_id != google_id:
-                raise HTTPException(status_code=400, detail="Email is already linked to a different Google account")
-            
-            user.google_id = google_id
-            user.provider = "GOOGLE"
-            user.profile_picture = picture
-            db.commit()
-            
-            event_bus.publish(AuditEvent(
-                workspace_id="SYSTEM",
-                organization_id=str(user.organization_id),
-                actor=user.email,
-                actor_type=ActorClassification.HUMAN_USER,
-                module="Authentication",
-                action="ACCOUNT_LINKED",
-                category=EventCategory.AUTHENTICATION,
-                severity=EventSeverity.INFO,
-                status=EventStatus.SUCCESS,
-                resource_type=ResourceClassification.SYSTEM
-            ))
-        else:
-            random_pw = secrets.token_urlsafe(32)
-            hashed_pw = hash_password(random_pw)
-            
-            user = provision_new_account(
-                db=db,
-                email=email,
-                full_name=name,
-                password_hash=hashed_pw,
-                organization_name=f"{name}'s Organization",
-                workspace_name="Default Workspace",
-                provider="GOOGLE",
-                google_id=google_id,
-                profile_picture=picture
-            )
-            
-            event_bus.publish(AuditEvent(
-                workspace_id="SYSTEM",
-                organization_id=str(user.organization_id),
-                actor=user.email,
-                actor_type=ActorClassification.HUMAN_USER,
-                module="Authentication",
-                action="ACCOUNT_CREATED",
-                category=EventCategory.AUTHENTICATION,
-                severity=EventSeverity.INFO,
-                status=EventStatus.SUCCESS,
-                resource_type=ResourceClassification.SYSTEM
-            ))
+    # ── 5. Resolve user (lookup → link → create) ─────────────────────────────
+    try:
+        user: User = db.query(User).filter(User.google_id == google_id).first()
 
+        if not user:
+            # No user with this google_id — check by email
+            user = db.query(User).filter(User.email == email).first()
+
+            if user:
+                # Email match found
+                if user.google_id and user.google_id != google_id:
+                    # This email is already linked to a DIFFERENT Google account
+                    raise HTTPException(
+                        status_code=status.HTTP_409_CONFLICT,
+                        detail="This email is already linked to a different Google account.",
+                    )
+
+                # Safe to link: either LOCAL account or same google_id (idempotent)
+                user.google_id = google_id
+                user.provider = "GOOGLE"
+                if picture:
+                    user.profile_picture = picture
+                db.commit()
+                db.refresh(user)
+                logger.info("Google account linked to existing user: %s", email)
+
+                try:
+                    event_bus.publish(
+                        AuditEvent(
+                            workspace_id="SYSTEM",
+                            organization_id=str(user.organization_id),
+                            actor=user.email,
+                            actor_type=ActorClassification.HUMAN_USER,
+                            module="Authentication",
+                            action="ACCOUNT_LINKED",
+                            category=EventCategory.AUTHENTICATION,
+                            severity=EventSeverity.INFO,
+                            status=EventStatus.SUCCESS,
+                            resource_type=ResourceClassification.SYSTEM,
+                        )
+                    )
+                except Exception:
+                    logger.warning("Audit event ACCOUNT_LINKED failed (non-fatal): %s", traceback.format_exc())
+
+            else:
+                # Brand-new user — provision full account
+                logger.info("Provisioning new Google account for: %s", email)
+                random_pw = secrets.token_urlsafe(32)
+                hashed_pw = hash_password(random_pw)
+
+                user = provision_new_account(
+                    db=db,
+                    email=email,
+                    full_name=name,
+                    password_hash=hashed_pw,
+                    organization_name=f"{name}'s Organization",
+                    workspace_name="Default Workspace",
+                    provider="GOOGLE",
+                    google_id=google_id,
+                    profile_picture=picture,
+                )
+
+                try:
+                    event_bus.publish(
+                        AuditEvent(
+                            workspace_id="SYSTEM",
+                            organization_id=str(user.organization_id),
+                            actor=user.email,
+                            actor_type=ActorClassification.HUMAN_USER,
+                            module="Authentication",
+                            action="ACCOUNT_CREATED",
+                            category=EventCategory.AUTHENTICATION,
+                            severity=EventSeverity.INFO,
+                            status=EventStatus.SUCCESS,
+                            resource_type=ResourceClassification.SYSTEM,
+                        )
+                    )
+                except Exception:
+                    logger.warning("Audit event ACCOUNT_CREATED failed (non-fatal): %s", traceback.format_exc())
+
+    except HTTPException:
+        raise  # Re-raise our own controlled HTTP exceptions untouched
+    except SQLAlchemyError as exc:
+        db.rollback()
+        logger.error("DB error during Google auth for %s: %s", email, traceback.format_exc())
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="A database error occurred during sign-in. Please try again.",
+        ) from exc
+    except Exception as exc:
+        db.rollback()
+        logger.error("Unexpected error during Google auth for %s: %s", email, traceback.format_exc())
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected server error occurred during Google Sign-In.",
+        ) from exc
+
+    # ── 6. Active check ───────────────────────────────────────────────────────
     if not user.is_active:
-        raise HTTPException(status_code=400, detail="Inactive user")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Your account has been deactivated. Contact your administrator.",
+        )
 
+    # ── 7. Issue JWT ─────────────────────────────────────────────────────────
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        subject=str(user.id), secret_key=settings.SECRET_KEY, expires_delta=access_token_expires
+        subject=str(user.id),
+        secret_key=settings.SECRET_KEY,
+        expires_delta=access_token_expires,
     )
-    
+
+    # ── 8. Audit: login success ───────────────────────────────────────────────
     workspace = db.query(Workspace).filter(Workspace.organization_id == user.organization_id).first()
     if workspace:
-        event_bus.publish(AuditEvent(
-            workspace_id=str(workspace.id),
-            organization_id=str(user.organization_id),
-            actor=user.email,
-            actor_type=ActorClassification.HUMAN_USER,
-            module="Authentication",
-            action="LOGIN_SUCCESS",
-            category=EventCategory.AUTHENTICATION,
-            severity=EventSeverity.INFO,
-            status=EventStatus.SUCCESS,
-            resource_type=ResourceClassification.SYSTEM
-        ))
-        
+        try:
+            event_bus.publish(
+                AuditEvent(
+                    workspace_id=str(workspace.id),
+                    organization_id=str(user.organization_id),
+                    actor=user.email,
+                    actor_type=ActorClassification.HUMAN_USER,
+                    module="Authentication",
+                    action="LOGIN_SUCCESS",
+                    category=EventCategory.AUTHENTICATION,
+                    severity=EventSeverity.INFO,
+                    status=EventStatus.SUCCESS,
+                    resource_type=ResourceClassification.SYSTEM,
+                )
+            )
+        except Exception:
+            logger.warning("Audit event LOGIN_SUCCESS failed (non-fatal): %s", traceback.format_exc())
+
     return {"access_token": access_token, "token_type": "bearer"}
 
+
+# ─────────────────────────────────────────────────────────────────────────────
+# GET /me
+# ─────────────────────────────────────────────────────────────────────────────
 @router.get("/me", response_model=AuthMeResponse)
 def read_user_me(
     current_user: User = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
-    # Fetch organization and workspace
     org = db.query(Organization).filter(Organization.id == current_user.organization_id).first()
     workspace = db.query(Workspace).filter(Workspace.organization_id == current_user.organization_id).first()
-    
+
     return {
         "user": {
             "id": str(current_user.id),
             "email": current_user.email,
             "full_name": current_user.full_name,
             "role": current_user.role,
-            "organization_id": str(current_user.organization_id)
+            "organization_id": str(current_user.organization_id),
         },
         "organization": {
             "id": str(org.id),
             "name": org.name,
-            "slug": org.slug
-        } if org else {},
+            "slug": org.slug,
+        }
+        if org
+        else {},
         "workspace": {
             "id": str(workspace.id),
             "name": workspace.name,
-            "environment": workspace.environment
-        } if workspace else {}
+            "environment": workspace.environment,
+        }
+        if workspace
+        else {},
     }
