@@ -32,7 +32,7 @@ class Settings(BaseSettings):
 
     
     # Neo4j config
-    NEO4J_URI: str = "bolt://localhost:7687"
+    NEO4J_URI: str = os.getenv("NEO4J_URI") or os.getenv("NEO4J_URL") or "bolt://localhost:7687"
     NEO4J_USER: str = "neo4j"
     NEO4J_USERNAME: str = ""
     NEO4J_PASSWORD: str = "12Asdf*#_"
