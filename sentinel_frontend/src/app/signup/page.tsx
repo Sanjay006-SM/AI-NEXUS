@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ShieldCheck, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import Script from "next/script";
 import api from "@/lib/api";
 import { useGlobalStore } from "@/lib/store";
 
@@ -48,8 +49,69 @@ export default function SignupPage() {
     }
   };
 
+  const handleGoogleCredentialResponse = async (response: any) => {
+    setIsLoading(true);
+    setError("");
+    try {
+      const res = await api.post('/auth/google', { credential: response.credential });
+      if (res.access_token) {
+        localStorage.setItem('auth-storage', JSON.stringify({ state: { token: res.access_token } }));
+        const me = await api.get('/auth/me');
+        if (me.workspace && me.workspace.id) {
+          setCurrentWorkspaceId(me.workspace.id);
+        }
+        window.location.href = "/dashboard";
+      }
+    } catch (err: any) {
+      setError(err.message || "Google Authentication failed");
+      setIsLoading(false);
+    }
+  };
+
+  const triggerGoogleAuth = () => {
+    const googleLoginWrapper = document.getElementById('google-login-wrapper');
+    if (googleLoginWrapper) {
+      const button = googleLoginWrapper.querySelector('div[role=button]') as HTMLElement;
+      if (button) {
+        button.click();
+      }
+    }
+  };
+
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+  const isGoogleConfigured = googleClientId && !googleClientId.includes('your-google-client-id') && !googleClientId.includes('<MY_REAL_CLIENT_ID>');
+
+  if (!isGoogleConfigured) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center p-6 bg-slate-50">
+        <div className="bg-red-50 text-red-600 p-6 rounded-xl border border-red-200 max-w-md">
+          <h2 className="text-lg font-bold mb-2">Developer Configuration Error</h2>
+          <p className="text-sm">
+            Google Authentication is not configured. Please set your real <strong>NEXT_PUBLIC_GOOGLE_CLIENT_ID</strong> in the <code>.env.local</code> file.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center relative z-10 p-6 bg-slate-50">
+      <Script
+        src="https://accounts.google.com/gsi/client"
+        onLoad={() => {
+          // @ts-ignore
+          window.google.accounts.id.initialize({
+            client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+            callback: handleGoogleCredentialResponse,
+          });
+          // @ts-ignore
+          window.google.accounts.id.renderButton(
+            document.getElementById("google-login-wrapper"),
+            { theme: "outline", size: "large", type: "standard" }
+          );
+        }}
+      />
+      <div id="google-login-wrapper" style={{ display: 'none' }}></div>
       {/* Return to Home Link */}
       <motion.div 
         initial={{ opacity: 0, y: -10 }}
@@ -183,7 +245,7 @@ export default function SignupPage() {
 
         {/* Social Options */}
         <div className="flex flex-col gap-3 mb-6">
-          <button type="button" className="w-full h-11 flex items-center justify-center gap-2 rounded-xl text-sm font-semibold border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 transition-colors">
+          <button type="button" onClick={triggerGoogleAuth} className="w-full h-11 flex items-center justify-center gap-2 rounded-xl text-sm font-semibold border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 transition-colors">
             Continue with Google
           </button>
           <button type="button" className="w-full h-11 flex items-center justify-center gap-2 rounded-xl text-sm font-semibold border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 transition-colors">

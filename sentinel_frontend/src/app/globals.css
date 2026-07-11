@@ -102,7 +102,7 @@
   --shadow-lg: 0 16px 40px rgba(197, 49, 185,0.14);
   --shadow-glow: 0 0 32px rgba(184, 38, 171,0.18);
   --shadow-sidebar-hover: 0 12px 28px rgba(197, 49, 185,0.18), 0 4px 10px rgba(15,15,26,0.06);
-  --glow-blue: 59, 130, 246; /* #3B82F6 */
+  --glow-primary: 197, 49, 185; /* #C531B9 */
 }
 
 /* --- React Flow Controls Override --- */
@@ -261,11 +261,11 @@
   
   .content-card-glow:hover,
   .content-card-glow:focus-visible {
-    border-color: rgba(var(--glow-blue), 0.9) !important;
+    border-color: rgba(var(--glow-primary), 0.9) !important;
     box-shadow:
-      0 0 0 1px rgba(var(--glow-blue), 0.4),
-      0 0 16px 2px rgba(var(--glow-blue), 0.35),
-      0 0 32px 8px rgba(var(--glow-blue), 0.18) !important;
+      0 0 0 1px rgba(var(--glow-primary), 0.4),
+      0 0 16px 2px rgba(var(--glow-primary), 0.35),
+      0 0 32px 8px rgba(var(--glow-primary), 0.18) !important;
     filter: brightness(1.02);
     z-index: 10;
   }

@@ -41,3 +41,6 @@ class AuthMeResponse(BaseModel):
     user: UserResponse
     organization: dict
     workspace: dict
+
+class GoogleLoginRequest(BaseModel):
+    credential: str

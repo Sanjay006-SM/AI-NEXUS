@@ -1,5 +1,6 @@
 import os
 from pydantic_settings import BaseSettings
+from pydantic import field_validator
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "SentinelAI API"
@@ -49,6 +50,16 @@ class Settings(BaseSettings):
     
     # Feature Flags
     ENABLE_GRAPH_EVIDENCE_ENGINE: bool = False
+
+    # Google Auth
+    GOOGLE_CLIENT_ID: str = ""
+
+    @field_validator("GOOGLE_CLIENT_ID", mode="after", check_fields=False)
+    @classmethod
+    def validate_google_client_id(cls, v: str) -> str:
+        if not v or "your-google-client-id" in v or "<MY_REAL_CLIENT_ID>" in v:
+            raise ValueError("GOOGLE_CLIENT_ID environment variable is missing or using a placeholder. Set it to your real Google Client ID.")
+        return v
 
     class Config:
         case_sensitive = True
