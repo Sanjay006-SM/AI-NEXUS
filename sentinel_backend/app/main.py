@@ -12,6 +12,7 @@ from app.projections.audit_projector import audit_projector
 
 logger = logging.getLogger(__name__)
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup — Neo4j connection is best-effort: if it fails the app still serves
@@ -32,43 +33,56 @@ async def lifespan(app: FastAPI):
     except Exception:
         pass
 
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
-# ---------------------------------------------------------------
-# CORS — explicit origins only, never wildcard with credentials
-# ---------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
+# CORS — Must be added BEFORE any other middleware and BEFORE include_router.
+#
+# CRITICAL RULES:
+#   1. allow_methods=["*"] — do NOT enumerate; "*" is required so the
+#      Access-Control-Allow-Methods response header contains all methods,
+#      satisfying any preflight regardless of what the browser requests.
+#   2. allow_headers=["*"] — do NOT enumerate a partial list.
+#      The x-workspace-id header sent by our frontend would be rejected by
+#      a browser preflight if it is not in the explicit allow_headers list.
+#      Using "*" covers all custom headers automatically.
+#   3. allow_credentials=True — required for Authorization header forwarding.
+#   4. Never use allow_origins=["*"] when allow_credentials=True — that is
+#      an invalid combination per the CORS spec. Always use explicit origins.
+# ─────────────────────────────────────────────────────────────────────────────
 _ALLOWED_ORIGINS = [
+    "https://ai-nexus-2eas.vercel.app",
     "http://localhost:3000",
     "http://localhost:3001",
     "https://sentinel14.netlify.app",
-    "https://ai-nexus-2eas.vercel.app",
 ]
 
-# Include any extra origin configured via environment variable
+# Support an optional extra origin from environment (e.g. staging deployments)
 if settings.FRONTEND_URL:
-    _origin = settings.FRONTEND_URL.rstrip("/")
-    if _origin not in _ALLOWED_ORIGINS:
-        _ALLOWED_ORIGINS.append(_origin)
-        logger.info("CORS: added FRONTEND_URL origin → %s", _origin)
+    _extra = settings.FRONTEND_URL.rstrip("/")
+    if _extra not in _ALLOWED_ORIGINS:
+        _ALLOWED_ORIGINS.append(_extra)
+        logger.info("CORS: added FRONTEND_URL origin → %s", _extra)
 
 logger.info("CORS allowed origins: %s", _ALLOWED_ORIGINS)
 
-# IMPORTANT: CORSMiddleware must be added FIRST so it fires before every route
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_ALLOWED_ORIGINS,
-    allow_credentials=True,        # Required for Authorization header to be sent
-    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allow_headers=["Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"],
-    expose_headers=["Content-Length", "X-Request-ID"],
-    max_age=600,                   # Preflight cache: 10 minutes
+    allow_credentials=True,
+    allow_methods=["*"],   # Covers GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD
+    allow_headers=["*"],   # Covers Authorization, Content-Type, x-workspace-id, etc.
+    expose_headers=["*"],
+    max_age=600,           # Preflight cache: 10 minutes — reduces OPTIONS round-trips
 )
 
+# Routers are included AFTER middleware so CORS wraps all routes
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
 if __name__ == "__main__":
