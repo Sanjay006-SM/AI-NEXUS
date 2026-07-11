@@ -106,3 +106,110 @@ class RiskFactorCalculator:
             reasons.append(f"Encountered {failed_count} 'AccessDenied' or 'UnauthorizedOperation' errors.")
             
         return score, reasons
+
+    def calc_no_mfa_console_login(self, identity: MachineIdentity) -> Tuple[int, List[str]]:
+        score = 0
+        reasons = []
+        
+        count = self.db.query(func.count(AccessLog.id))\
+            .filter(AccessLog.identity_arn == identity.arn)\
+            .filter(AccessLog.workspace_id == identity.workspace_id)\
+            .filter(AccessLog.event_name == 'ConsoleLogin')\
+            .filter(AccessLog.raw_event_json.op('->')('additionalEventData').op('->>')('MFAUsed') == 'No')\
+            .scalar()
+            
+        root_count = self.db.query(func.count(AccessLog.id))\
+            .filter(AccessLog.identity_arn == identity.arn)\
+            .filter(AccessLog.workspace_id == identity.workspace_id)\
+            .filter(AccessLog.event_name == 'ConsoleLogin')\
+            .filter(AccessLog.raw_event_json.op('->')('additionalEventData').op('->>')('MFAUsed') == 'No')\
+            .filter(AccessLog.raw_event_json.op('->')('userIdentity').op('->>')('type') == 'Root')\
+            .scalar()
+
+        if root_count > 0:
+            score += 35
+            reasons.append(f"Root user ConsoleLogin without MFA detected ({root_count} times).")
+        elif count > 0:
+            score += 35
+            reasons.append(f"ConsoleLogin without MFA detected ({count} times).")
+            
+        return score, reasons
+
+    def calc_cloudtrail_evasion(self, identity: MachineIdentity) -> Tuple[int, List[str]]:
+        score = 0
+        reasons = []
+        
+        count = self.db.query(func.count(AccessLog.id))\
+            .filter(AccessLog.identity_arn == identity.arn)\
+            .filter(AccessLog.workspace_id == identity.workspace_id)\
+            .filter(AccessLog.event_source == 'cloudtrail.amazonaws.com')\
+            .filter(AccessLog.event_name.in_(['StopLogging', 'DeleteTrail', 'UpdateTrail']))\
+            .scalar()
+            
+        if count > 0:
+            score += 40
+            reasons.append(f"Performed {count} CloudTrail evasion actions (StopLogging, DeleteTrail, etc).")
+            
+        return score, reasons
+
+    def calc_dangerous_policy(self, identity: MachineIdentity) -> Tuple[int, List[str]]:
+        score = 0
+        reasons = []
+        
+        count = self.db.query(func.count(AccessLog.id))\
+            .filter(AccessLog.identity_arn == identity.arn)\
+            .filter(AccessLog.workspace_id == identity.workspace_id)\
+            .filter(AccessLog.event_name == 'AttachUserPolicy')\
+            .filter(AccessLog.raw_event_json.op('->')('requestParameters').op('->>')('policyArn').like('%AdministratorAccess%'))\
+            .scalar()
+            
+        if count > 0:
+            score += 30
+            reasons.append(f"Attached high-privilege policy AdministratorAccess {count} times.")
+            
+        return score, reasons
+
+    def calc_public_ingress(self, identity: MachineIdentity) -> Tuple[int, List[str]]:
+        score = 0
+        reasons = []
+        
+        logs = self.db.query(AccessLog.raw_event_json)\
+            .filter(AccessLog.identity_arn == identity.arn)\
+            .filter(AccessLog.workspace_id == identity.workspace_id)\
+            .filter(AccessLog.event_name == 'AuthorizeSecurityGroupIngress')\
+            .all()
+            
+        trigger_count = 0
+        for log in logs:
+            try:
+                event = log[0]
+                req_params = event.get('requestParameters', {}) or {}
+                ip_perms = req_params.get('ipPermissions', {}) or {}
+                
+                items = []
+                if isinstance(ip_perms, dict):
+                    items = ip_perms.get('items', [])
+                elif isinstance(ip_perms, list):
+                    items = ip_perms
+                    
+                for perm in items:
+                    from_port = perm.get('fromPort')
+                    if from_port in [22, 3389, '22', '3389']:
+                        ip_ranges = perm.get('ipRanges', {}) or {}
+                        ranges = []
+                        if isinstance(ip_ranges, dict):
+                            ranges = ip_ranges.get('items', [])
+                        elif isinstance(ip_ranges, list):
+                            ranges = ip_ranges
+                        
+                        if any(r.get('cidrIp') == '0.0.0.0/0' for r in ranges):
+                            trigger_count += 1
+                            break # Only count once per event
+            except Exception:
+                pass
+                
+        if trigger_count > 0:
+            score += 25
+            reasons.append(f"Authorized public ingress (0.0.0.0/0) on sensitive ports {trigger_count} times.")
+            
+        return score, reasons

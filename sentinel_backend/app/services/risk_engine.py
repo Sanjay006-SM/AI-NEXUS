@@ -64,6 +64,26 @@ class RiskEngine:
         total_score += score
         all_reasons.extend(reasons)
         
+        # 7. No-MFA Console Login (SQL JSONB-based)
+        score, reasons = self.calculator.calc_no_mfa_console_login(identity)
+        total_score += score
+        all_reasons.extend(reasons)
+        
+        # 8. CloudTrail Evasion (SQL-based)
+        score, reasons = self.calculator.calc_cloudtrail_evasion(identity)
+        total_score += score
+        all_reasons.extend(reasons)
+        
+        # 9. Dangerous Policy Attachment (SQL JSONB-based)
+        score, reasons = self.calculator.calc_dangerous_policy(identity)
+        total_score += score
+        all_reasons.extend(reasons)
+        
+        # 10. Public Ingress on Sensitive Ports (SQL JSONB-based / Python iteration)
+        score, reasons = self.calculator.calc_public_ingress(identity)
+        total_score += score
+        all_reasons.extend(reasons)
+        
         # Enforce bounds (0-100)
         total_score = min(max(total_score, 0), 100)
         
