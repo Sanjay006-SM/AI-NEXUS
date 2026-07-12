@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ShieldCheck, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import Script from "next/script";
 import api from "@/lib/api";
 import { useGlobalStore } from "@/lib/store";
 import Script from "next/script";

@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Shield, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import Script from "next/script";
 import api from "@/lib/api";
 import { useGlobalStore } from "@/lib/store";
 import Script from "next/script";
@@ -68,8 +69,25 @@ export default function LoginPage() {
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
   const isGoogleConfigured = googleClientId && !googleClientId.includes('your-google-client-id') && !googleClientId.includes('<MY_REAL_CLIENT_ID>');
 
+
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center relative z-10 p-6">
+      <Script
+        src="https://accounts.google.com/gsi/client"
+        onLoad={() => {
+          // @ts-ignore
+          window.google.accounts.id.initialize({
+            client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+            callback: handleGoogleCredentialResponse,
+          });
+          // @ts-ignore
+          window.google.accounts.id.renderButton(
+            document.getElementById("google-login-wrapper"),
+            { theme: "outline", size: "large", type: "standard" }
+          );
+        }}
+      />
+      <div id="google-login-wrapper" style={{ display: 'none' }}></div>
       
       {isGoogleConfigured && (
         <Script
