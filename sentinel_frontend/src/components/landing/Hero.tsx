@@ -9,7 +9,7 @@ export default function Hero() {
     <section className="relative z-10 w-full min-h-[calc(100vh-120px)] flex flex-col lg:flex-row items-center pt-[120px] pb-20 overflow-hidden">
       
       {/* Left Column (Text Content) - 45% width */}
-      <div className="w-full lg:w-[45%] flex flex-col items-start px-6 lg:pl-[100px] relative z-20">
+      <div className="w-full lg:w-[45%] flex flex-col items-center lg:items-start text-center lg:text-left px-6 lg:pl-[100px] relative z-20">
         <motion.h1 
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
@@ -32,7 +32,7 @@ export default function Hero() {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.2 }}
-          className="mt-6"
+          className="mt-6 flex justify-center lg:justify-start w-full"
         >
           <Link
             href="/signup"

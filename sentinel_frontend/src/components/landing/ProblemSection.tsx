@@ -59,7 +59,7 @@ export default function ProblemSection() {
           <div className="w-14 h-14 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-100 shrink-0">
             <Sparkles className="w-6 h-6" />
           </div>
-          <div>
+          <div className="text-center md:text-left">
             <h4 className="text-lg font-bold text-slate-900 mb-1">
               SentinelAI Resolution Engine
             </h4>
