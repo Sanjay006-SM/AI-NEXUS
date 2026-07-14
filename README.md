@@ -1,3 +1,4 @@
+[Uploading test101.json…]()
 # SentinelAI 🛡️
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-Access_Platform-blue?style=for-the-badge&logo=vercel)](https://ai-nexus-2eas.vercel.app/)
@@ -225,7 +226,240 @@ sentinel-commend/
 │   ├── app/
 │   │   ├── api/                # API Endpoints (v1)
 │   │   ├── core/               # Configuration & Security
-│   │   ├── db/                 # PostgreSQL Sessions & Migrations
+│   │   ├── db/                 # PostgreSQL Sessions & MigrationsYou are now in the implementation phase.
+
+Do NOT make assumptions or propose speculative fixes (such as changing uniqueness constraints) until you have collected evidence.
+
+The current symptom is:
+
+Authentication works.
+CloudTrail upload completes.
+Dashboard still shows zero identities, zero findings, zero attack paths, and "Waiting for stream..."
+
+Your job is to identify the exact stage where the data stops flowing and fix only the verified root cause.
+
+Rules
+Do not modify the database schema unless you prove it is the root cause.
+Do not modify uniqueness constraints based on assumptions.
+Every change must be supported by logs, SQL queries, Neo4j queries, or API responses.
+Do not mark anything complete until verified by execution.
+Do not replace missing backend functionality with mock data.
+Keep multi-tenant isolation intact.
+Phase 1 — Instrument the Pipeline
+
+Add temporary debug logging (to be removed later) at every stage of the ingestion pipeline.
+
+Log:
+
+Upload Endpoint
+
+Print:
+
+organization_id
+workspace_id
+uploaded filename
+file size
+authenticated user
+upload timestamp
+CloudTrail Parser
+
+Print:
+
+total events parsed
+users discovered
+roles discovered
+policies discovered
+resources discovered
+parser exceptions
+skipped events
+PostgreSQL
+
+For every insert print:
+
+table
+inserted rows
+skipped rows
+duplicate rows
+workspace_id
+organization_id
+
+Then immediately execute a verification query and print:
+
+SELECT COUNT(*) ...
+
+to confirm records actually exist.
+
+Neo4j
+
+Print:
+
+nodes created
+relationships created
+labels
+workspace_id
+organization_id
+
+Then execute Cypher verification queries to confirm the graph was written.
+
+Risk Engine
+
+Print:
+
+identities analyzed
+findings created
+attack paths created
+execution time
+Dashboard APIs
+
+For every endpoint:
+
+Dashboard Summary
+Identity Center
+Risk Center
+Investigations
+Organization
+
+Print:
+
+workspace_id received
+organization_id received
+SQL query
+Cypher query
+rows returned
+Phase 2 — Execute a Clean End-to-End Test
+
+Create a brand new organization with a brand new email.
+
+Do not reuse previous data.
+
+Then:
+
+Register
+Login
+Upload the provided CloudTrail JSON
+Wait until processing finishes
+
+Collect logs from every stage.
+
+Phase 3 — Locate the Failure
+
+Produce a trace like this:
+
+Upload
+✔ Success
+
+↓
+
+Parser
+✔ Success
+
+↓
+
+PostgreSQL
+✔ 12457 events inserted
+
+↓
+
+Neo4j
+✘ No nodes created
+
+↓
+
+Risk Engine
+Not executed
+
+↓
+
+Dashboard
+0 rows returned
+
+or
+
+Upload
+✔
+
+↓
+
+Parser
+✔
+
+↓
+
+Postgres
+✔
+
+↓
+
+Neo4j
+✔
+
+↓
+
+Risk Engine
+✔
+
+↓
+
+Dashboard Query
+✘ Wrong workspace filter
+
+Identify exactly where the data disappears.
+
+Do not guess.
+
+Phase 4 — Fix Only the Verified Root Cause
+
+After identifying the exact failing stage:
+
+implement the minimum necessary fix
+preserve tenant isolation
+preserve security
+preserve JWT-based workspace filtering
+
+Do not introduce temporary workarounds.
+
+Phase 5 — Re-run the Entire Pipeline
+
+Repeat the complete workflow:
+
+Register
+Login
+Upload CloudTrail JSON
+Query PostgreSQL
+Query Neo4j
+Query Dashboard APIs
+Open the UI
+
+Verify that:
+
+Executive Dashboard updates
+Identity Center shows identities
+Risk Center shows findings
+Investigations shows attack paths (if generated)
+Organization metrics update
+Cloud Accounts update (if applicable)
+"Waiting for stream..." disappears
+Dashboard values are no longer zero
+Phase 6 — Evidence-Based Final Report
+
+Do not simply say "fixed."
+
+Return a report containing:
+
+Root cause
+Evidence proving the root cause
+Files modified
+Functions modified
+SQL verification results
+Neo4j verification results
+Dashboard API verification
+Screenshots or logs (if available)
+Confirmation that a real CloudTrail upload populates the dashboard
+Confirmation that Company A cannot see Company B's data
+
+If multiple root causes exist, list each separately and show how each was verified.
+
+Do not mark the task complete until the application displays real uploaded data in the UI after a fresh CloudTrail upload.
 │   │   ├── graph/              # Neo4j Driver Connection
 │   │   ├── models/             # SQLAlchemy ORM Models
 │   │   ├── schemas/            # Pydantic Schemas
@@ -236,3 +470,49 @@ sentinel-commend/
 ├── SentinelAI_Architecture_Design.md  # Detailed Backend/Database Schema Design
 └── SentinelAI_Product_Spec.md         # Full Product Requirements & Personas
 ```
+
+
+
+
+
+---
+
+# 📂 Sample CloudTrail Logs
+
+To help you quickly test SentinelAI, we've provided a collection of sample AWS CloudTrail logs.
+
+These logs include both **normal** and **high-risk** security events such as:
+
+- Normal AWS API activity
+- IAM User creation
+- Privilege escalation
+- Root account usage
+- CloudTrail logging disabled
+- Public Security Group exposure
+- Access key creation
+- EC2 instance termination
+- Sensitive S3 object access
+- KMS key deletion events
+
+### 📥 Download Sample Logs
+
+👉 **Google Drive Folder**
+
+https://drive.google.com/drive/folders/1g9IcJwinDB5DnS1Is7_uRS5N1ZM1DB7X
+
+After downloading:
+
+1. Open **SentinelAI**.
+2. Navigate to **Integrations → Manual Upload**.
+3. Upload any `.json` CloudTrail log from the downloaded folder.
+4. Wait for the ingestion pipeline to complete.
+5. View the generated:
+   - Executive Dashboard
+   - Identity Center
+   - Risk Center
+   - Attack Path Visualization
+   - AI Security Analyst insights
+
+> **Note:** The sample dataset contains logs with varying severity levels (Low, Medium, High, and Critical) to demonstrate SentinelAI's risk scoring and threat detection capabilities.
+
+---
