@@ -40,7 +40,7 @@ export default function Sidebar() {
   const orgName = orgData?.name || "Loading Workspace...";
 
   return (
-    <aside className="w-[280px] shrink-0 h-[calc(100vh-48px)] sticky top-6 flex flex-col z-50 bg-white border border-slate-200 rounded-[24px] overflow-visible shadow-sm">
+    <aside className="hidden lg:flex w-[280px] shrink-0 h-[calc(100vh-48px)] sticky top-6 flex-col z-50 bg-white border border-slate-200 rounded-[24px] overflow-visible shadow-sm">
       {/* Premium Logo Area */}
       <div className="h-20 flex items-center px-6 shrink-0 border-b border-slate-100 relative">
         <Link href="/" className="flex items-center gap-2.5 w-full">

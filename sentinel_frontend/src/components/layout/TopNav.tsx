@@ -1,13 +1,31 @@
 "use client";
 
 import { useState } from "react";
-import { Bell, Search, MessageSquare, Settings, ShieldCheck, ShieldAlert, Sparkles, GitBranch, RefreshCw, HelpCircle } from "lucide-react";
+import { Bell, Search, MessageSquare, Settings, ShieldCheck, ShieldAlert, Sparkles, GitBranch, RefreshCw, HelpCircle, Menu, X, LayoutDashboard, Users, Terminal, BrainCircuit, FileBarChart, Building2, ScrollText, Cloud as CloudIcon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNotifications } from "@/lib/queries";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+const navItems = [
+  { name: "Executive Overview", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Identity Center", href: "/identities", icon: Users },
+  { name: "Investigations", href: "/attack-graph", icon: GitBranch },
+  { name: "Risk Center", href: "/risk-findings", icon: ShieldAlert },
+  { name: "Integrations", href: "/integrations", icon: CloudIcon },
+  { name: "Data Sources", href: "/cloudtrail", icon: Terminal },
+  { name: "SentinelAI Copilot", href: "/ai-investigation", icon: BrainCircuit },
+  { name: "Organization", href: "/organization", icon: Building2 },
+  { name: "Audit Logs", href: "/audit-logs", icon: ScrollText },
+  { name: "Reports", href: "/reports", icon: FileBarChart },
+  { name: "Settings", href: "/settings", icon: Settings },
+];
 
 export default function TopNav() {
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const { data: notifications = [], isLoading } = useNotifications();
+  const pathname = usePathname();
   
   const unreadCount = notifications.filter((n: any) => !n.read).length;
 
@@ -21,14 +39,20 @@ export default function TopNav() {
   };
 
   return (
-    <header className="h-[70px] z-40 flex items-center justify-between px-6 mb-4 bg-white border border-slate-200 rounded-2xl shadow-sm relative">
-      <div className="flex items-center gap-6">
-        <div className="relative flex items-center">
+    <header className="h-[70px] z-40 flex items-center justify-between px-4 sm:px-6 mb-4 bg-white border border-slate-200 rounded-2xl shadow-sm relative">
+      <div className="flex items-center gap-2 sm:gap-6">
+        <button 
+          className="lg:hidden p-2 text-slate-600 hover:text-slate-900"
+          onClick={() => setShowMobileMenu(!showMobileMenu)}
+        >
+          {showMobileMenu ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
+        <div className="relative flex items-center hidden sm:flex">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
             type="text"
             placeholder="Quick search by identity or risk..."
-            className="h-10 w-64 md:w-80 rounded-xl pl-9 pr-4 text-xs text-slate-800 placeholder:text-slate-400 bg-slate-50 border border-slate-200 outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600/10 transition-all"
+            className="h-10 w-48 md:w-80 rounded-xl pl-9 pr-4 text-xs text-slate-800 placeholder:text-slate-400 bg-slate-50 border border-slate-200 outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600/10 transition-all"
           />
         </div>
       </div>
@@ -128,6 +152,67 @@ export default function TopNav() {
           </div>
         </div>
       </div>
+
+      {/* Mobile Menu Drawer */}
+      <AnimatePresence>
+        {showMobileMenu && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowMobileMenu(false)}
+              className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40 lg:hidden"
+            />
+            
+            {/* Drawer */}
+            <motion.div
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", bounce: 0, duration: 0.3 }}
+              className="fixed top-0 left-0 bottom-0 w-[280px] bg-white border-r border-slate-200 shadow-xl z-50 lg:hidden flex flex-col"
+            >
+              {/* Drawer Header */}
+              <div className="h-[70px] flex items-center px-6 shrink-0 border-b border-slate-100 relative">
+                <Link href="/" onClick={() => setShowMobileMenu(false)} className="flex items-center gap-2.5 w-full">
+                  <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
+                    <ShieldCheck className="w-4.5 h-4.5 text-white" />
+                  </div>
+                  <span className="font-[family-name:var(--font-jakarta)] text-slate-900 font-bold text-lg">
+                    SentinelAI
+                  </span>
+                </Link>
+                <button onClick={() => setShowMobileMenu(false)} className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-slate-600">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Drawer Links */}
+              <nav className="flex-1 overflow-y-auto p-4 flex flex-col gap-1.5 scrollbar-none">
+                {navItems.map((item) => {
+                  const isActive = pathname === item.href;
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      onClick={() => setShowMobileMenu(false)}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+                        isActive ? "bg-indigo-50 text-indigo-700" : "text-slate-600 hover:bg-slate-50 hover:text-indigo-600"
+                      }`}
+                    >
+                      <Icon className={`w-5 h-5 ${isActive ? "text-indigo-600" : "text-slate-400"}`} />
+                      {item.name}
+                    </Link>
+                  );
+                })}
+              </nav>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </header>
   );
 }
