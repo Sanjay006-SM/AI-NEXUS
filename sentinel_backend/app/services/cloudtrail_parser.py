@@ -93,7 +93,11 @@ class CloudTrailParser:
                 resource_arn = params.get("policyArn") or params.get("roleArn") or params.get("resourceArn")
                 if not resource_arn and params.get("roleName"):
                     # Mock an ARN if only roleName is provided
-                    account = event.recipientAccountId or "unknown"
+                    account = (
+                                event.recipientAccountId
+                                or event.userIdentity.accountId
+                                or "unknown"
+                            )
                     resource_arn = f"arn:aws:iam::{account}:role/{params.get('roleName')}"
             
         # Generate synthetic ARN if missing (common for AWS service-generated events)
@@ -101,7 +105,11 @@ class CloudTrailParser:
         if event.userIdentity and event.userIdentity.arn:
             identity_arn = event.userIdentity.arn
         elif event.userIdentity and event.userIdentity.invokedBy:
-            account = event.recipientAccountId or "unknown"
+            account = (
+                        event.recipientAccountId
+                        or event.userIdentity.accountId
+                        or "unknown"
+                    )
             identity_arn = f"arn:aws:iam::{account}:service/{event.userIdentity.invokedBy}"
             
         return {
@@ -113,6 +121,10 @@ class CloudTrailParser:
             "source_ip": event.sourceIPAddress,
             "identity_arn": identity_arn,
             "resource_arn": resource_arn,
-            "account_id": event.recipientAccountId,
+            "account_id": (
+                            event.recipientAccountId
+                            or event.userIdentity.accountId
+                            or "unknown"
+                            ),    
             "raw_event_json": event.model_dump(mode='json')
         }
